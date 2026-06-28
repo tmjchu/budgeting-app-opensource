@@ -264,6 +264,13 @@ tbody p {
   margin-top: 12px;
 }
 
+.app-credit {
+  margin-top: 18px;
+  color: #60706a;
+  font-size: 0.82rem;
+  text-align: right;
+}
+
 .table-scroll {
   overflow-x: auto;
 }
@@ -342,5 +349,9 @@ td {
 
   .content-grid .panel:last-child {
     grid-column: auto;
+  }
+
+  .app-credit {
+    text-align: left;
   }
 }

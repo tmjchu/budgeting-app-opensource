@@ -133,6 +133,10 @@ export function App() {
       </section>
 
       <TransactionTable transactions={transactions} />
+
+      <footer className="app-credit">
+        Created by Tommy.
+      </footer>
     </main>
   );
 }

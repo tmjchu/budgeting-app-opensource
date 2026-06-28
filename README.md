@@ -2,6 +2,10 @@
 
 Local-first budgeting app with a Java Spring Boot backend, CSV persistence, Plaid REST integration, and a React/Vite dashboard.
 
+## Attribution
+
+This project was originally created by Tommy. See [NOTICE](NOTICE) for attribution details.
+
 ## Run
 
 Backend:
