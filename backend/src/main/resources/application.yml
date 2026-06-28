@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+budget:
+  data-directory: ${BUDGET_DATA_DIRECTORY:./data}
+  plaid:
+    base-url: ${PLAID_BASE_URL:https://sandbox.plaid.com}
+    client-id: ${PLAID_CLIENT_ID:}
+    secret: ${PLAID_SECRET:}
+    client-name: ${PLAID_CLIENT_NAME:Local Budget}
+    products:
+      - transactions
+    country-codes:
+      - US
