@@ -1,6 +1,5 @@
 package com.localbudget.app.gateway.plaid.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.localbudget.app.config.BudgetAppProperties;
 import com.localbudget.app.domain.model.Account;
 import com.localbudget.app.domain.model.PlaidItem;
@@ -18,6 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.JsonNode;
 
 @Component
 public class PlaidRestGateway implements PlaidGateway {

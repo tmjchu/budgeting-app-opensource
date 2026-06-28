@@ -37,7 +37,9 @@ public class AccountCsvRepository extends CsvSupport {
     }
 
     public List<AccountCsvRecord> findTracked() {
-        return findAll().stream().filter(csvRecord -> Boolean.parseBoolean(csvRecord.tracked())).toList();
+        return findAll().stream()
+                .filter(csvRecord -> Boolean.parseBoolean(csvRecord.tracked()))
+                .toList();
     }
 
     public void upsertAll(List<AccountCsvRecord> accounts) {

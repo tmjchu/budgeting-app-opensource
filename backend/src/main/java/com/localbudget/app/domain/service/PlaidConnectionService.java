@@ -10,6 +10,7 @@ import com.localbudget.app.domain.model.result.ExchangePlaidPublicTokenResult;
 import com.localbudget.app.gateway.plaid.api.PlaidGateway;
 import com.localbudget.app.gateway.plaid.model.PlaidExchangeResult;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -17,12 +18,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class PlaidConnectionService {
 
+    private static final Duration LINK_TOKEN_TTL = Duration.ofMinutes(30);
+
     private final PlaidGateway plaidGateway;
     private final PlaidItemCsvRepository plaidItemRepository;
     private final AccountService accountService;
     private final PlaidItemConverter plaidItemConverter;
     private final AccountConverter accountConverter;
     private final Clock clock;
+    private CachedLinkToken cachedLinkToken;
 
     public PlaidConnectionService(
             PlaidGateway plaidGateway,
@@ -39,8 +43,15 @@ public class PlaidConnectionService {
         this.clock = clock;
     }
 
-    public String createLinkToken() {
-        return plaidGateway.createLinkToken();
+    public synchronized String createLinkToken() {
+        Instant now = Instant.now(clock);
+        if (cachedLinkToken != null && cachedLinkToken.expiresAt().isAfter(now)) {
+            return cachedLinkToken.token();
+        }
+
+        String linkToken = plaidGateway.createLinkToken();
+        cachedLinkToken = new CachedLinkToken(linkToken, now.plus(LINK_TOKEN_TTL));
+        return linkToken;
     }
 
     public ExchangePlaidPublicTokenResult exchangePublicToken(
@@ -69,4 +80,6 @@ public class PlaidConnectionService {
     public List<PlaidItem> findConnectedItems() {
         return plaidItemRepository.findAll().stream().map(plaidItemConverter::fromCsv).toList();
     }
+
+    private record CachedLinkToken(String token, Instant expiresAt) {}
 }
