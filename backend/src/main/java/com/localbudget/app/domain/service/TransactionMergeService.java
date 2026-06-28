@@ -4,7 +4,6 @@ import com.localbudget.app.converter.TransactionConverter;
 import com.localbudget.app.data.repository.TransactionCsvRepository;
 import com.localbudget.app.domain.model.Transaction;
 import com.localbudget.app.domain.model.result.TransactionMergeResult;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,16 +45,13 @@ public class TransactionMergeService {
             merged.put(candidate.transactionId(), candidate);
         }
 
-        transactionRepository.writeAll(merged.values().stream()
-                .map(transactionConverter::toCsv)
-                .toList());
+        transactionRepository.writeAll(
+                merged.values().stream().map(transactionConverter::toCsv).toList());
         return new TransactionMergeResult(added, updated, unchanged);
     }
 
     public List<Transaction> findAll() {
-        return transactionRepository.findAll().stream()
-                .map(transactionConverter::fromCsv)
-                .toList();
+        return transactionRepository.findAll().stream().map(transactionConverter::fromCsv).toList();
     }
 
     private Transaction preserveLocalEdits(Transaction fetched, Transaction existing) {

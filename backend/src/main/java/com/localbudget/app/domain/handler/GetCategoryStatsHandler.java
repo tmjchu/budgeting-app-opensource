@@ -22,6 +22,7 @@ public class GetCategoryStatsHandler {
 
     public List<CategoryStats> handle(YearMonth month) {
         YearMonth resolvedMonth = month == null ? YearMonth.now() : month;
-        return statsAggregationService.buildCategoryStats(resolvedMonth, transactionQueryService.findAll());
+        return statsAggregationService.buildCategoryStats(
+                resolvedMonth, transactionQueryService.findAll());
     }
 }

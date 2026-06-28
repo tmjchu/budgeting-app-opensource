@@ -7,6 +7,4 @@ public record Account(
         String mask,
         String type,
         String subtype,
-        boolean tracked
-) {
-}
+        boolean tracked) {}

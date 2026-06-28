@@ -17,8 +17,7 @@ public record Transaction(
         String localCategory,
         boolean pending,
         boolean excluded,
-        String paymentChannel
-) {
+        String paymentChannel) {
     public String effectiveCategory() {
         if (localCategory != null && !localCategory.isBlank()) {
             return localCategory;

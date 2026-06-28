@@ -8,11 +8,15 @@ This project was originally created by Tommy. See [NOTICE](NOTICE) for attributi
 
 ## Run
 
+Requires Java 21+ for the backend and Node.js for the frontend.
+
 Backend:
 
 ```bash
 cd backend
-PLAID_CLIENT_ID=your_client_id PLAID_SECRET=your_secret mvn spring-boot:run
+PLAID_CLIENT_ID=your_client_id
+PLAID_SECRET=your_secret 
+mvn spring-boot:run
 ```
 
 Frontend:
@@ -54,6 +58,8 @@ Backend:
 ```bash
 cd backend
 mvn test
+mvn spotless:check
+mvn spotless:apply
 ```
 
 Frontend:

@@ -15,6 +15,4 @@ public record PlaidTransaction(
         String primaryCategory,
         String detailedCategory,
         boolean pending,
-        String paymentChannel
-) {
-}
+        String paymentChannel) {}

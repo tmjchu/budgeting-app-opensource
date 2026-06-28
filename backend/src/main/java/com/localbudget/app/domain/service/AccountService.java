@@ -12,15 +12,14 @@ public class AccountService {
     private final AccountCsvRepository accountRepository;
     private final AccountConverter accountConverter;
 
-    public AccountService(AccountCsvRepository accountRepository, AccountConverter accountConverter) {
+    public AccountService(
+            AccountCsvRepository accountRepository, AccountConverter accountConverter) {
         this.accountRepository = accountRepository;
         this.accountConverter = accountConverter;
     }
 
     public List<Account> findAll() {
-        return accountRepository.findAll().stream()
-                .map(accountConverter::fromCsv)
-                .toList();
+        return accountRepository.findAll().stream().map(accountConverter::fromCsv).toList();
     }
 
     public List<Account> findTrackedByPlaidItemId(String plaidItemId) {
@@ -31,8 +30,6 @@ public class AccountService {
     }
 
     public void saveAll(List<Account> accounts) {
-        accountRepository.upsertAll(accounts.stream()
-                .map(accountConverter::toCsv)
-                .toList());
+        accountRepository.upsertAll(accounts.stream().map(accountConverter::toCsv).toList());
     }
 }

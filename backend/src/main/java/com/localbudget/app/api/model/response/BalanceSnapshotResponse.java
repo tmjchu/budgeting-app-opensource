@@ -11,6 +11,4 @@ public record BalanceSnapshotResponse(
         String accountMask,
         BigDecimal currentBalance,
         BigDecimal availableBalance,
-        String isoCurrencyCode
-) {
-}
+        String isoCurrencyCode) {}

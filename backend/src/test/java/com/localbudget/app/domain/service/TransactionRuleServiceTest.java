@@ -15,10 +15,18 @@ class TransactionRuleServiceTest {
 
     @Test
     void applyRulesMarksPlaidTransfersAsExcluded() {
-        Transaction transfer = TestFixtures.transaction(
-                "transfer", LocalDate.parse("2026-06-01"), new BigDecimal("100.00"), "TRANSFER");
-        Transaction food = TestFixtures.transaction(
-                "food", LocalDate.parse("2026-06-02"), new BigDecimal("25.00"), "FOOD_AND_DRINK");
+        Transaction transfer =
+                TestFixtures.transaction(
+                        "transfer",
+                        LocalDate.parse("2026-06-01"),
+                        new BigDecimal("100.00"),
+                        "TRANSFER");
+        Transaction food =
+                TestFixtures.transaction(
+                        "food",
+                        LocalDate.parse("2026-06-02"),
+                        new BigDecimal("25.00"),
+                        "FOOD_AND_DRINK");
 
         List<Transaction> normalized = service.applyRules(List.of(transfer, food));
 

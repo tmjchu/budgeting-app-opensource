@@ -5,17 +5,12 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "budget")
-public record BudgetAppProperties(
-        Path dataDirectory,
-        Plaid plaid
-) {
+public record BudgetAppProperties(Path dataDirectory, Plaid plaid) {
     public record Plaid(
             String baseUrl,
             String clientId,
             String secret,
             String clientName,
             List<String> products,
-            List<String> countryCodes
-    ) {
-    }
+            List<String> countryCodes) {}
 }

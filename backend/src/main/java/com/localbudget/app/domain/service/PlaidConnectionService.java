@@ -43,16 +43,23 @@ public class PlaidConnectionService {
         return plaidGateway.createLinkToken();
     }
 
-    public ExchangePlaidPublicTokenResult exchangePublicToken(ExchangePlaidPublicTokenCommand command) {
-        PlaidExchangeResult exchangeResult = plaidGateway.exchangePublicToken(command.publicToken());
-        PlaidItem plaidItem = new PlaidItem(
-                exchangeResult.plaidItemId(),
-                exchangeResult.accessToken(),
-                command.institutionName(),
-                Instant.now(clock));
-        List<Account> accounts = command.selectedAccounts().stream()
-                .map(selectedAccount -> accountConverter.fromSelectedAccount(plaidItem.plaidItemId(), selectedAccount))
-                .toList();
+    public ExchangePlaidPublicTokenResult exchangePublicToken(
+            ExchangePlaidPublicTokenCommand command) {
+        PlaidExchangeResult exchangeResult =
+                plaidGateway.exchangePublicToken(command.publicToken());
+        PlaidItem plaidItem =
+                new PlaidItem(
+                        exchangeResult.plaidItemId(),
+                        exchangeResult.accessToken(),
+                        command.institutionName(),
+                        Instant.now(clock));
+        List<Account> accounts =
+                command.selectedAccounts().stream()
+                        .map(
+                                selectedAccount ->
+                                        accountConverter.fromSelectedAccount(
+                                                plaidItem.plaidItemId(), selectedAccount))
+                        .toList();
 
         plaidItemRepository.upsert(plaidItemConverter.toCsv(plaidItem));
         accountService.saveAll(accounts);
@@ -60,8 +67,6 @@ public class PlaidConnectionService {
     }
 
     public List<PlaidItem> findConnectedItems() {
-        return plaidItemRepository.findAll().stream()
-                .map(plaidItemConverter::fromCsv)
-                .toList();
+        return plaidItemRepository.findAll().stream().map(plaidItemConverter::fromCsv).toList();
     }
 }

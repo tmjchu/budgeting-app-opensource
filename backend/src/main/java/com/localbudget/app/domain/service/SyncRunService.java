@@ -17,22 +17,26 @@ public class SyncRunService {
     private final SyncRunConverter syncRunConverter;
     private final Clock clock;
 
-    public SyncRunService(SyncRunCsvRepository syncRunRepository, SyncRunConverter syncRunConverter, Clock clock) {
+    public SyncRunService(
+            SyncRunCsvRepository syncRunRepository,
+            SyncRunConverter syncRunConverter,
+            Clock clock) {
         this.syncRunRepository = syncRunRepository;
         this.syncRunConverter = syncRunConverter;
         this.clock = clock;
     }
 
     public SyncRun start() {
-        SyncRun syncRun = new SyncRun(
-                UUID.randomUUID().toString(),
-                Instant.now(clock),
-                null,
-                SyncStatus.RUNNING,
-                0,
-                0,
-                0,
-                null);
+        SyncRun syncRun =
+                new SyncRun(
+                        UUID.randomUUID().toString(),
+                        Instant.now(clock),
+                        null,
+                        SyncStatus.RUNNING,
+                        0,
+                        0,
+                        0,
+                        null);
         syncRunRepository.upsert(syncRunConverter.toCsv(syncRun));
         return syncRun;
     }
@@ -41,29 +45,31 @@ public class SyncRunService {
             SyncRun syncRun,
             TransactionMergeResult transactionMergeResult,
             int balanceSnapshotsAdded) {
-        SyncRun completed = new SyncRun(
-                syncRun.syncId(),
-                syncRun.startedAt(),
-                Instant.now(clock),
-                SyncStatus.SUCCESS,
-                transactionMergeResult.added(),
-                transactionMergeResult.updated(),
-                balanceSnapshotsAdded,
-                null);
+        SyncRun completed =
+                new SyncRun(
+                        syncRun.syncId(),
+                        syncRun.startedAt(),
+                        Instant.now(clock),
+                        SyncStatus.SUCCESS,
+                        transactionMergeResult.added(),
+                        transactionMergeResult.updated(),
+                        balanceSnapshotsAdded,
+                        null);
         syncRunRepository.upsert(syncRunConverter.toCsv(completed));
         return completed;
     }
 
     public SyncRun markFailed(SyncRun syncRun, Exception exception) {
-        SyncRun failed = new SyncRun(
-                syncRun.syncId(),
-                syncRun.startedAt(),
-                Instant.now(clock),
-                SyncStatus.FAILED,
-                syncRun.transactionsAdded(),
-                syncRun.transactionsUpdated(),
-                syncRun.balanceSnapshotsAdded(),
-                exception.getMessage());
+        SyncRun failed =
+                new SyncRun(
+                        syncRun.syncId(),
+                        syncRun.startedAt(),
+                        Instant.now(clock),
+                        SyncStatus.FAILED,
+                        syncRun.transactionsAdded(),
+                        syncRun.transactionsUpdated(),
+                        syncRun.balanceSnapshotsAdded(),
+                        exception.getMessage());
         syncRunRepository.upsert(syncRunConverter.toCsv(failed));
         return failed;
     }

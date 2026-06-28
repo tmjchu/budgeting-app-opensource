@@ -11,21 +11,23 @@ import org.junit.jupiter.api.io.TempDir;
 
 class TransactionCsvRepositoryTest {
 
-    @TempDir
-    Path dataDirectory;
+    @TempDir Path dataDirectory;
 
     @Test
     void writeAllSortsByDateDescendingAndRoundTripsQuotedText() {
-        TransactionCsvRepository repository = new TransactionCsvRepository(TestFixtures.properties(dataDirectory));
+        TransactionCsvRepository repository =
+                new TransactionCsvRepository(TestFixtures.properties(dataDirectory));
 
-        repository.writeAll(List.of(
-                transaction("txn-old", "2026-01-01", "Coffee, Inc."),
-                transaction("txn-new", "2026-02-01", "Market \"Special\"")));
+        repository.writeAll(
+                List.of(
+                        transaction("txn-old", "2026-01-01", "Coffee, Inc."),
+                        transaction("txn-new", "2026-02-01", "Market \"Special\"")));
 
         assertThat(repository.findAll())
                 .extracting(TransactionCsvRecord::transactionId)
                 .containsExactly("txn-new", "txn-old");
-        assertThat(repository.findById("txn-new")).get()
+        assertThat(repository.findById("txn-new"))
+                .get()
                 .extracting(TransactionCsvRecord::merchantName)
                 .isEqualTo("Market \"Special\"");
     }

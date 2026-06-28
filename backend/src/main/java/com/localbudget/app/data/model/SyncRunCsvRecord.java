@@ -8,6 +8,4 @@ public record SyncRunCsvRecord(
         String transactionsAdded,
         String transactionsUpdated,
         String balanceSnapshotsAdded,
-        String errorMessage
-) {
-}
+        String errorMessage) {}

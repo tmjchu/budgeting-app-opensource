@@ -7,6 +7,4 @@ import java.util.List;
 public record SyncResult(
         SyncRun syncRun,
         TransactionMergeResult transactionMergeResult,
-        List<BalanceSnapshot> balanceSnapshots
-) {
-}
+        List<BalanceSnapshot> balanceSnapshots) {}

@@ -14,8 +14,14 @@ public class SyncRunCsvRepository extends CsvSupport {
 
     private static final String FILE_NAME = "sync_runs.csv";
     private static final String[] HEADERS = {
-            "sync_id", "started_at", "finished_at", "status", "transactions_added",
-            "transactions_updated", "balance_snapshots_added", "error_message"
+        "sync_id",
+        "started_at",
+        "finished_at",
+        "status",
+        "transactions_added",
+        "transactions_updated",
+        "balance_snapshots_added",
+        "error_message"
     };
 
     public SyncRunCsvRepository(BudgetAppProperties properties) {
@@ -24,15 +30,17 @@ public class SyncRunCsvRepository extends CsvSupport {
 
     public List<SyncRunCsvRecord> findAll() {
         return readRecords(FILE_NAME, HEADERS).stream()
-                .map(record -> new SyncRunCsvRecord(
-                        value(record, "sync_id"),
-                        value(record, "started_at"),
-                        value(record, "finished_at"),
-                        value(record, "status"),
-                        value(record, "transactions_added"),
-                        value(record, "transactions_updated"),
-                        value(record, "balance_snapshots_added"),
-                        value(record, "error_message")))
+                .map(
+                        record ->
+                                new SyncRunCsvRecord(
+                                        value(record, "sync_id"),
+                                        value(record, "started_at"),
+                                        value(record, "finished_at"),
+                                        value(record, "status"),
+                                        value(record, "transactions_added"),
+                                        value(record, "transactions_updated"),
+                                        value(record, "balance_snapshots_added"),
+                                        value(record, "error_message")))
                 .toList();
     }
 
@@ -47,16 +55,21 @@ public class SyncRunCsvRepository extends CsvSupport {
 
     private void writeAll(List<SyncRunCsvRecord> syncRuns) {
         syncRuns.sort(Comparator.comparing(SyncRunCsvRecord::startedAt));
-        writeRows(FILE_NAME, HEADERS, syncRuns.stream()
-                .map(record -> List.of(
-                        value(record.syncId()),
-                        value(record.startedAt()),
-                        value(record.finishedAt()),
-                        value(record.status()),
-                        value(record.transactionsAdded()),
-                        value(record.transactionsUpdated()),
-                        value(record.balanceSnapshotsAdded()),
-                        value(record.errorMessage())))
-                .toList());
+        writeRows(
+                FILE_NAME,
+                HEADERS,
+                syncRuns.stream()
+                        .map(
+                                record ->
+                                        List.of(
+                                                value(record.syncId()),
+                                                value(record.startedAt()),
+                                                value(record.finishedAt()),
+                                                value(record.status()),
+                                                value(record.transactionsAdded()),
+                                                value(record.transactionsUpdated()),
+                                                value(record.balanceSnapshotsAdded()),
+                                                value(record.errorMessage())))
+                        .toList());
     }
 }

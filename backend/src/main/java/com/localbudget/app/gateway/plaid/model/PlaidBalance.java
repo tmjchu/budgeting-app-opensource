@@ -12,6 +12,4 @@ public record PlaidBalance(
         BigDecimal currentBalance,
         BigDecimal availableBalance,
         String isoCurrencyCode,
-        String unofficialCurrencyCode
-) {
-}
+        String unofficialCurrencyCode) {}

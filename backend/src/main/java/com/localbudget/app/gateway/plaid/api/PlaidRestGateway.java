@@ -51,9 +51,7 @@ public class PlaidRestGateway implements PlaidGateway {
         body.put("public_token", publicToken);
 
         JsonNode response = post("/item/public_token/exchange", body);
-        return new PlaidExchangeResult(
-                text(response, "access_token"),
-                text(response, "item_id"));
+        return new PlaidExchangeResult(text(response, "access_token"), text(response, "item_id"));
     }
 
     @Override
@@ -62,8 +60,9 @@ public class PlaidRestGateway implements PlaidGateway {
             List<Account> trackedAccounts,
             LocalDate startDate,
             LocalDate endDate) {
-        Map<String, Account> accountById = trackedAccounts.stream()
-                .collect(Collectors.toMap(Account::accountId, Function.identity()));
+        Map<String, Account> accountById =
+                trackedAccounts.stream()
+                        .collect(Collectors.toMap(Account::accountId, Function.identity()));
         List<String> accountIds = trackedAccounts.stream().map(Account::accountId).toList();
         List<PlaidTransaction> transactions = new ArrayList<>();
         int total = Integer.MAX_VALUE;
@@ -74,29 +73,32 @@ public class PlaidRestGateway implements PlaidGateway {
             body.put("access_token", plaidItem.accessToken());
             body.put("start_date", startDate.toString());
             body.put("end_date", endDate.toString());
-            body.put("options", Map.of(
-                    "account_ids", accountIds,
-                    "count", PAGE_SIZE,
-                    "offset", offset));
+            body.put(
+                    "options",
+                    Map.of(
+                            "account_ids", accountIds,
+                            "count", PAGE_SIZE,
+                            "offset", offset));
 
             JsonNode response = post("/transactions/get", body);
             total = response.path("total_transactions").asInt(0);
             for (JsonNode node : response.path("transactions")) {
                 String accountId = text(node, "account_id");
                 Account account = accountById.get(accountId);
-                transactions.add(new PlaidTransaction(
-                        plaidItem.plaidItemId(),
-                        text(node, "transaction_id"),
-                        accountId,
-                        account == null ? null : account.name(),
-                        LocalDate.parse(text(node, "date")),
-                        text(node, "name"),
-                        text(node, "merchant_name"),
-                        amount(node.path("amount")),
-                        category(node, "primary"),
-                        category(node, "detailed"),
-                        node.path("pending").asBoolean(false),
-                        text(node, "payment_channel")));
+                transactions.add(
+                        new PlaidTransaction(
+                                plaidItem.plaidItemId(),
+                                text(node, "transaction_id"),
+                                accountId,
+                                account == null ? null : account.name(),
+                                LocalDate.parse(text(node, "date")),
+                                text(node, "name"),
+                                text(node, "merchant_name"),
+                                amount(node.path("amount")),
+                                category(node, "primary"),
+                                category(node, "detailed"),
+                                node.path("pending").asBoolean(false),
+                                text(node, "payment_channel")));
             }
             offset += PAGE_SIZE;
         }
@@ -106,8 +108,9 @@ public class PlaidRestGateway implements PlaidGateway {
 
     @Override
     public List<PlaidBalance> fetchBalances(PlaidItem plaidItem, List<Account> trackedAccounts) {
-        Map<String, Account> accountById = trackedAccounts.stream()
-                .collect(Collectors.toMap(Account::accountId, Function.identity()));
+        Map<String, Account> accountById =
+                trackedAccounts.stream()
+                        .collect(Collectors.toMap(Account::accountId, Function.identity()));
         List<String> accountIds = trackedAccounts.stream().map(Account::accountId).toList();
         Map<String, Object> body = baseCredentials();
         body.put("access_token", plaidItem.accessToken());
@@ -119,28 +122,27 @@ public class PlaidRestGateway implements PlaidGateway {
             String accountId = text(node, "account_id");
             Account trackedAccount = accountById.get(accountId);
             JsonNode balance = node.path("balances");
-            balances.add(new PlaidBalance(
-                    plaidItem.plaidItemId(),
-                    accountId,
-                    trackedAccount == null ? text(node, "name") : trackedAccount.name(),
-                    trackedAccount == null ? text(node, "mask") : trackedAccount.mask(),
-                    trackedAccount == null ? text(node, "type") : trackedAccount.type(),
-                    trackedAccount == null ? text(node, "subtype") : trackedAccount.subtype(),
-                    amount(balance.path("current")),
-                    amount(balance.path("available")),
-                    text(balance, "iso_currency_code"),
-                    text(balance, "unofficial_currency_code")));
+            balances.add(
+                    new PlaidBalance(
+                            plaidItem.plaidItemId(),
+                            accountId,
+                            trackedAccount == null ? text(node, "name") : trackedAccount.name(),
+                            trackedAccount == null ? text(node, "mask") : trackedAccount.mask(),
+                            trackedAccount == null ? text(node, "type") : trackedAccount.type(),
+                            trackedAccount == null
+                                    ? text(node, "subtype")
+                                    : trackedAccount.subtype(),
+                            amount(balance.path("current")),
+                            amount(balance.path("available")),
+                            text(balance, "iso_currency_code"),
+                            text(balance, "unofficial_currency_code")));
         }
         return balances;
     }
 
     private JsonNode post(String path, Map<String, Object> body) {
         validateCredentials();
-        return restClient.post()
-                .uri(path)
-                .body(body)
-                .retrieve()
-                .body(JsonNode.class);
+        return restClient.post().uri(path).body(body).retrieve().body(JsonNode.class);
     }
 
     private Map<String, Object> baseCredentials() {

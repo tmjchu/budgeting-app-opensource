@@ -14,7 +14,8 @@ public class SyncController {
     private final SyncBankDataHandler syncBankDataHandler;
     private final SyncRunConverter syncRunConverter;
 
-    public SyncController(SyncBankDataHandler syncBankDataHandler, SyncRunConverter syncRunConverter) {
+    public SyncController(
+            SyncBankDataHandler syncBankDataHandler, SyncRunConverter syncRunConverter) {
         this.syncBankDataHandler = syncBankDataHandler;
         this.syncRunConverter = syncRunConverter;
     }

@@ -8,6 +8,4 @@ public record MonthlyStats(
         BigDecimal income,
         BigDecimal spending,
         BigDecimal netCashFlow,
-        long transactionCount
-) {
-}
+        long transactionCount) {}

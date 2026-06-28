@@ -7,6 +7,4 @@ public record AccountCsvRecord(
         String mask,
         String type,
         String subtype,
-        String tracked
-) {
-}
+        String tracked) {}

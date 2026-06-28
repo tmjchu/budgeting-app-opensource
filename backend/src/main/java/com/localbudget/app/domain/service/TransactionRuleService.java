@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 public class TransactionRuleService {
 
     public List<Transaction> applyRules(List<Transaction> transactions) {
-        return transactions.stream()
-                .map(this::markTransfersExcluded)
-                .toList();
+        return transactions.stream().map(this::markTransfersExcluded).toList();
     }
 
     private Transaction markTransfersExcluded(Transaction transaction) {

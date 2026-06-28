@@ -29,15 +29,15 @@ public class TransactionController {
 
     @GetMapping
     public List<TransactionResponse> getTransactions(
-            @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                    LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                    LocalDate endDate,
             @RequestParam(required = false) String accountId,
             @RequestParam(required = false) String category) {
-        TransactionQueryCommand command = new TransactionQueryCommand(month, startDate, endDate, accountId, category);
+        TransactionQueryCommand command =
+                new TransactionQueryCommand(month, startDate, endDate, accountId, category);
         return getTransactionsHandler.handle(command).stream()
                 .map(transactionConverter::toResponse)
                 .toList();

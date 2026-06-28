@@ -12,6 +12,4 @@ public record BalanceSnapshotCsvRecord(
         String currentBalance,
         String availableBalance,
         String isoCurrencyCode,
-        String unofficialCurrencyCode
-) {
-}
+        String unofficialCurrencyCode) {}

@@ -44,14 +44,14 @@ public class BalanceSnapshotService {
         Instant syncedAt = Instant.now(clock);
         List<BalanceSnapshot> snapshots = new ArrayList<>();
         for (PlaidItem plaidItem : plaidItems) {
-            List<Account> trackedAccounts = accountService.findTrackedByPlaidItemId(plaidItem.plaidItemId());
+            List<Account> trackedAccounts =
+                    accountService.findTrackedByPlaidItemId(plaidItem.plaidItemId());
             plaidGateway.fetchBalances(plaidItem, trackedAccounts).stream()
                     .map(balance -> balanceSnapshotConverter.fromGateway(balance, syncedAt))
                     .forEach(snapshots::add);
         }
-        balanceSnapshotRepository.appendAll(snapshots.stream()
-                .map(balanceSnapshotConverter::toCsv)
-                .toList());
+        balanceSnapshotRepository.appendAll(
+                snapshots.stream().map(balanceSnapshotConverter::toCsv).toList());
         return snapshots;
     }
 }

@@ -8,6 +8,4 @@ import java.util.List;
 public record ExchangePublicTokenRequest(
         @NotBlank String publicToken,
         String institutionName,
-        @NotEmpty List<@Valid SelectedAccountRequest> selectedAccounts
-) {
-}
+        @NotEmpty List<@Valid SelectedAccountRequest> selectedAccounts) {}

@@ -14,6 +14,4 @@ public record TransactionCsvRecord(
         String localCategory,
         String pending,
         String excluded,
-        String paymentChannel
-) {
-}
+        String paymentChannel) {}

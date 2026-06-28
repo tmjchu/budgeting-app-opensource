@@ -11,8 +11,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 class BalanceSnapshotCsvRepositoryTest {
 
-    @TempDir
-    Path dataDirectory;
+    @TempDir Path dataDirectory;
 
     @Test
     void appendAllPreservesHistoricalSnapshots() {

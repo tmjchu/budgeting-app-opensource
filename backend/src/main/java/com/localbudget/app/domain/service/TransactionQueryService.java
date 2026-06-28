@@ -23,14 +23,21 @@ public class TransactionQueryService {
         return transactionMergeService.findAll().stream()
                 .filter(transaction -> !transaction.date().isBefore(start))
                 .filter(transaction -> !transaction.date().isAfter(end))
-                .filter(transaction -> command.accountId() == null
-                        || command.accountId().isBlank()
-                        || command.accountId().equals(transaction.accountId()))
-                .filter(transaction -> command.category() == null
-                        || command.category().isBlank()
-                        || command.category().equalsIgnoreCase(transaction.effectiveCategory()))
-                .sorted(Comparator.comparing(Transaction::date).reversed()
-                        .thenComparing(Transaction::transactionId))
+                .filter(
+                        transaction ->
+                                command.accountId() == null
+                                        || command.accountId().isBlank()
+                                        || command.accountId().equals(transaction.accountId()))
+                .filter(
+                        transaction ->
+                                command.category() == null
+                                        || command.category().isBlank()
+                                        || command.category()
+                                                .equalsIgnoreCase(transaction.effectiveCategory()))
+                .sorted(
+                        Comparator.comparing(Transaction::date)
+                                .reversed()
+                                .thenComparing(Transaction::transactionId))
                 .toList();
     }
 

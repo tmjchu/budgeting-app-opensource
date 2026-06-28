@@ -15,15 +15,14 @@ public class AccountController {
     private final GetAccountsHandler getAccountsHandler;
     private final AccountConverter accountConverter;
 
-    public AccountController(GetAccountsHandler getAccountsHandler, AccountConverter accountConverter) {
+    public AccountController(
+            GetAccountsHandler getAccountsHandler, AccountConverter accountConverter) {
         this.getAccountsHandler = getAccountsHandler;
         this.accountConverter = accountConverter;
     }
 
     @GetMapping
     public List<AccountResponse> getAccounts() {
-        return getAccountsHandler.handle().stream()
-                .map(accountConverter::toResponse)
-                .toList();
+        return getAccountsHandler.handle().stream().map(accountConverter::toResponse).toList();
     }
 }

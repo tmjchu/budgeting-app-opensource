@@ -14,6 +14,4 @@ public record TransactionResponse(
         String category,
         boolean pending,
         boolean excluded,
-        String paymentChannel
-) {
-}
+        String paymentChannel) {}

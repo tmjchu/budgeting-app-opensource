@@ -37,13 +37,15 @@ public class PlaidLinkController {
     }
 
     @PostMapping("/exchange-public-token")
-    public List<AccountResponse> exchangePublicToken(@Valid @RequestBody ExchangePublicTokenRequest request) {
-        ExchangePlaidPublicTokenCommand command = new ExchangePlaidPublicTokenCommand(
-                request.publicToken(),
-                request.institutionName(),
-                request.selectedAccounts().stream()
-                        .map(accountConverter::toCommand)
-                        .toList());
+    public List<AccountResponse> exchangePublicToken(
+            @Valid @RequestBody ExchangePublicTokenRequest request) {
+        ExchangePlaidPublicTokenCommand command =
+                new ExchangePlaidPublicTokenCommand(
+                        request.publicToken(),
+                        request.institutionName(),
+                        request.selectedAccounts().stream()
+                                .map(accountConverter::toCommand)
+                                .toList());
         return exchangePlaidPublicTokenHandler.handle(command).trackedAccounts().stream()
                 .map(accountConverter::toResponse)
                 .toList();

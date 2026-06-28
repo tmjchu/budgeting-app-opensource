@@ -18,12 +18,32 @@ class StatsAggregationServiceTest {
 
     @Test
     void buildMonthlyStatsTreatsPositiveAmountsAsSpendingAndNegativeAmountsAsIncome() {
-        List<Transaction> transactions = List.of(
-                TestFixtures.transaction("coffee", LocalDate.parse("2026-06-01"), new BigDecimal("5.25"), "FOOD"),
-                TestFixtures.transaction("rent", LocalDate.parse("2026-06-02"), new BigDecimal("1800.00"), "RENT"),
-                TestFixtures.transaction("pay", LocalDate.parse("2026-06-03"), new BigDecimal("-4000.00"), "PAYROLL"),
-                TestFixtures.transaction("old", LocalDate.parse("2026-05-01"), new BigDecimal("999.00"), "OTHER"),
-                excluded("transfer", LocalDate.parse("2026-06-04"), new BigDecimal("50.00")));
+        List<Transaction> transactions =
+                List.of(
+                        TestFixtures.transaction(
+                                "coffee",
+                                LocalDate.parse("2026-06-01"),
+                                new BigDecimal("5.25"),
+                                "FOOD"),
+                        TestFixtures.transaction(
+                                "rent",
+                                LocalDate.parse("2026-06-02"),
+                                new BigDecimal("1800.00"),
+                                "RENT"),
+                        TestFixtures.transaction(
+                                "pay",
+                                LocalDate.parse("2026-06-03"),
+                                new BigDecimal("-4000.00"),
+                                "PAYROLL"),
+                        TestFixtures.transaction(
+                                "old",
+                                LocalDate.parse("2026-05-01"),
+                                new BigDecimal("999.00"),
+                                "OTHER"),
+                        excluded(
+                                "transfer",
+                                LocalDate.parse("2026-06-04"),
+                                new BigDecimal("50.00")));
 
         MonthlyStats stats = service.buildMonthlyStats(YearMonth.parse("2026-06"), transactions);
 
@@ -35,29 +55,38 @@ class StatsAggregationServiceTest {
 
     @Test
     void buildCategoryStatsGroupsSpendingByEffectiveCategory() {
-        Transaction groceries = TestFixtures.transaction(
-                "groceries", LocalDate.parse("2026-06-01"), new BigDecimal("80.00"), "GENERAL_MERCHANDISE");
-        Transaction restaurants = TestFixtures.transaction(
-                "restaurant", LocalDate.parse("2026-06-02"), new BigDecimal("40.00"), "FOOD_AND_DRINK");
-        Transaction localOverride = new Transaction(
-                "coffee",
-                "item-1",
-                "acc-checking",
-                "Main Checking",
-                LocalDate.parse("2026-06-03"),
-                "Coffee",
-                "Coffee",
-                new BigDecimal("5.00"),
-                "FOOD_AND_DRINK",
-                "FOOD_AND_DRINK_COFFEE",
-                "Treats",
-                false,
-                false,
-                "in store");
+        Transaction groceries =
+                TestFixtures.transaction(
+                        "groceries",
+                        LocalDate.parse("2026-06-01"),
+                        new BigDecimal("80.00"),
+                        "GENERAL_MERCHANDISE");
+        Transaction restaurants =
+                TestFixtures.transaction(
+                        "restaurant",
+                        LocalDate.parse("2026-06-02"),
+                        new BigDecimal("40.00"),
+                        "FOOD_AND_DRINK");
+        Transaction localOverride =
+                new Transaction(
+                        "coffee",
+                        "item-1",
+                        "acc-checking",
+                        "Main Checking",
+                        LocalDate.parse("2026-06-03"),
+                        "Coffee",
+                        "Coffee",
+                        new BigDecimal("5.00"),
+                        "FOOD_AND_DRINK",
+                        "FOOD_AND_DRINK_COFFEE",
+                        "Treats",
+                        false,
+                        false,
+                        "in store");
 
-        List<CategoryStats> stats = service.buildCategoryStats(
-                YearMonth.parse("2026-06"),
-                List.of(groceries, restaurants, localOverride));
+        List<CategoryStats> stats =
+                service.buildCategoryStats(
+                        YearMonth.parse("2026-06"), List.of(groceries, restaurants, localOverride));
 
         assertThat(stats)
                 .extracting(CategoryStats::category)

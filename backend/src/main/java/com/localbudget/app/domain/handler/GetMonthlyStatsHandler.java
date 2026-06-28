@@ -21,6 +21,7 @@ public class GetMonthlyStatsHandler {
 
     public MonthlyStats handle(YearMonth month) {
         YearMonth resolvedMonth = month == null ? YearMonth.now() : month;
-        return statsAggregationService.buildMonthlyStats(resolvedMonth, transactionQueryService.findAll());
+        return statsAggregationService.buildMonthlyStats(
+                resolvedMonth, transactionQueryService.findAll());
     }
 }

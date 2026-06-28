@@ -10,6 +10,4 @@ public record SyncRun(
         int transactionsAdded,
         int transactionsUpdated,
         int balanceSnapshotsAdded,
-        String errorMessage
-) {
-}
+        String errorMessage) {}

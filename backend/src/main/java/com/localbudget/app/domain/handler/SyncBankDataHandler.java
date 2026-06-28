@@ -56,9 +56,12 @@ public class SyncBankDataHandler {
 
             List<Transaction> fetchedTransactions =
                     transactionFetchService.fetchTransactions(connectedItems, startDate, endDate);
-            List<Transaction> normalizedTransactions = transactionRuleService.applyRules(fetchedTransactions);
-            TransactionMergeResult mergeResult = transactionMergeService.mergeIntoLocalStore(normalizedTransactions);
-            List<BalanceSnapshot> snapshots = balanceSnapshotService.captureCurrentBalances(connectedItems);
+            List<Transaction> normalizedTransactions =
+                    transactionRuleService.applyRules(fetchedTransactions);
+            TransactionMergeResult mergeResult =
+                    transactionMergeService.mergeIntoLocalStore(normalizedTransactions);
+            List<BalanceSnapshot> snapshots =
+                    balanceSnapshotService.captureCurrentBalances(connectedItems);
 
             SyncRun completed = syncRunService.markSuccess(syncRun, mergeResult, snapshots.size());
             return new SyncResult(completed, mergeResult, snapshots);

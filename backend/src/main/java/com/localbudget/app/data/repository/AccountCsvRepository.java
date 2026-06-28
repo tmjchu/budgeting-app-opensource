@@ -14,7 +14,7 @@ public class AccountCsvRepository extends CsvSupport {
 
     private static final String FILE_NAME = "accounts.csv";
     private static final String[] HEADERS = {
-            "account_id", "plaid_item_id", "name", "mask", "type", "subtype", "tracked"
+        "account_id", "plaid_item_id", "name", "mask", "type", "subtype", "tracked"
     };
 
     public AccountCsvRepository(BudgetAppProperties properties) {
@@ -23,21 +23,21 @@ public class AccountCsvRepository extends CsvSupport {
 
     public List<AccountCsvRecord> findAll() {
         return readRecords(FILE_NAME, HEADERS).stream()
-                .map(record -> new AccountCsvRecord(
-                        value(record, "account_id"),
-                        value(record, "plaid_item_id"),
-                        value(record, "name"),
-                        value(record, "mask"),
-                        value(record, "type"),
-                        value(record, "subtype"),
-                        value(record, "tracked")))
+                .map(
+                        csvRecord ->
+                                new AccountCsvRecord(
+                                        value(csvRecord, "account_id"),
+                                        value(csvRecord, "plaid_item_id"),
+                                        value(csvRecord, "name"),
+                                        value(csvRecord, "mask"),
+                                        value(csvRecord, "type"),
+                                        value(csvRecord, "subtype"),
+                                        value(csvRecord, "tracked")))
                 .toList();
     }
 
     public List<AccountCsvRecord> findTracked() {
-        return findAll().stream()
-                .filter(record -> Boolean.parseBoolean(record.tracked()))
-                .toList();
+        return findAll().stream().filter(csvRecord -> Boolean.parseBoolean(csvRecord.tracked())).toList();
     }
 
     public void upsertAll(List<AccountCsvRecord> accounts) {
@@ -52,17 +52,23 @@ public class AccountCsvRepository extends CsvSupport {
     }
 
     private void writeAll(List<AccountCsvRecord> accounts) {
-        accounts.sort(Comparator.comparing(AccountCsvRecord::plaidItemId)
-                .thenComparing(AccountCsvRecord::accountId));
-        writeRows(FILE_NAME, HEADERS, accounts.stream()
-                .map(record -> List.of(
-                        value(record.accountId()),
-                        value(record.plaidItemId()),
-                        value(record.name()),
-                        value(record.mask()),
-                        value(record.type()),
-                        value(record.subtype()),
-                        value(record.tracked())))
-                .toList());
+        accounts.sort(
+                Comparator.comparing(AccountCsvRecord::plaidItemId)
+                        .thenComparing(AccountCsvRecord::accountId));
+        writeRows(
+                FILE_NAME,
+                HEADERS,
+                accounts.stream()
+                        .map(
+                                account ->
+                                        List.of(
+                                                value(account.accountId()),
+                                                value(account.plaidItemId()),
+                                                value(account.name()),
+                                                value(account.mask()),
+                                                value(account.type()),
+                                                value(account.subtype()),
+                                                value(account.tracked())))
+                        .toList());
     }
 }

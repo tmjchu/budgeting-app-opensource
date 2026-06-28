@@ -27,12 +27,11 @@ public class TransactionFetchService {
     }
 
     public List<Transaction> fetchTransactions(
-            List<PlaidItem> plaidItems,
-            LocalDate startDate,
-            LocalDate endDate) {
+            List<PlaidItem> plaidItems, LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = new ArrayList<>();
         for (PlaidItem plaidItem : plaidItems) {
-            List<Account> trackedAccounts = accountService.findTrackedByPlaidItemId(plaidItem.plaidItemId());
+            List<Account> trackedAccounts =
+                    accountService.findTrackedByPlaidItemId(plaidItem.plaidItemId());
             plaidGateway.fetchTransactions(plaidItem, trackedAccounts, startDate, endDate).stream()
                     .map(transactionConverter::fromGateway)
                     .forEach(transactions::add);

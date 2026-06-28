@@ -32,11 +32,13 @@ abstract class CsvSupport {
         }
 
         try (Reader reader = Files.newBufferedReader(file);
-             CSVParser parser = CSVFormat.DEFAULT.builder()
-                     .setHeader(headers)
-                     .setSkipHeaderRecord(true)
-                     .build()
-                     .parse(reader)) {
+                CSVParser parser =
+                        CSVFormat.DEFAULT
+                                .builder()
+                                .setHeader(headers)
+                                .setSkipHeaderRecord(true)
+                                .build()
+                                .parse(reader)) {
             return new ArrayList<>(parser.getRecords());
         } catch (IOException ex) {
             throw new IllegalStateException("Unable to read " + file, ex);
@@ -48,10 +50,8 @@ abstract class CsvSupport {
         try {
             Files.createDirectories(file.getParent());
             try (Writer writer = Files.newBufferedWriter(file);
-                 CSVPrinter printer = CSVFormat.DEFAULT.builder()
-                         .setHeader(headers)
-                         .build()
-                         .print(writer)) {
+                    CSVPrinter printer =
+                            CSVFormat.DEFAULT.builder().setHeader(headers).build().print(writer)) {
                 for (List<String> row : rows) {
                     printer.printRecord(row);
                 }

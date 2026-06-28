@@ -8,6 +8,4 @@ public record TransactionQueryCommand(
         LocalDate startDate,
         LocalDate endDate,
         String accountId,
-        String category
-) {
-}
+        String category) {}

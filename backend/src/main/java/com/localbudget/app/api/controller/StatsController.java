@@ -30,8 +30,7 @@ public class StatsController {
 
     @GetMapping("/monthly")
     public MonthlyStatsResponse getMonthlyStats(
-            @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
         MonthlyStats stats = getMonthlyStatsHandler.handle(month);
         return new MonthlyStatsResponse(
                 stats.month().toString(),
@@ -43,14 +42,12 @@ public class StatsController {
 
     @GetMapping("/categories")
     public List<CategoryStatsResponse> getCategoryStats(
-            @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
-        return getCategoryStatsHandler.handle(month).stream()
-                .map(this::toResponse)
-                .toList();
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
+        return getCategoryStatsHandler.handle(month).stream().map(this::toResponse).toList();
     }
 
     private CategoryStatsResponse toResponse(CategoryStats stats) {
-        return new CategoryStatsResponse(stats.category(), stats.amount(), stats.transactionCount());
+        return new CategoryStatsResponse(
+                stats.category(), stats.amount(), stats.transactionCount());
     }
 }

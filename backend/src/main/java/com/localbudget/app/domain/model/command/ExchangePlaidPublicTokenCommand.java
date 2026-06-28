@@ -5,6 +5,4 @@ import java.util.List;
 public record ExchangePlaidPublicTokenCommand(
         String publicToken,
         String institutionName,
-        List<SelectedAccountCommand> selectedAccounts
-) {
-}
+        List<SelectedAccountCommand> selectedAccounts) {}

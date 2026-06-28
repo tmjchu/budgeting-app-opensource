@@ -26,39 +26,40 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BalanceSnapshotServiceTest {
 
-    @Mock
-    private PlaidGateway plaidGateway;
-    @Mock
-    private AccountService accountService;
-    @Mock
-    private BalanceSnapshotCsvRepository repository;
+    @Mock private PlaidGateway plaidGateway;
+    @Mock private AccountService accountService;
+    @Mock private BalanceSnapshotCsvRepository repository;
 
     @Test
     void captureCurrentBalancesFetchesOnlyTrackedAccountsAndAppendsSnapshotRows() {
         Account account = TestFixtures.checkingAccount();
         when(accountService.findTrackedByPlaidItemId("item-1")).thenReturn(List.of(account));
         when(plaidGateway.fetchBalances(TestFixtures.plaidItem(), List.of(account)))
-                .thenReturn(List.of(new PlaidBalance(
-                        "item-1",
-                        "acc-checking",
-                        "Main Checking",
-                        "1234",
-                        "depository",
-                        "checking",
-                        new BigDecimal("200.00"),
-                        new BigDecimal("180.00"),
-                        "USD",
-                        null)));
+                .thenReturn(
+                        List.of(
+                                new PlaidBalance(
+                                        "item-1",
+                                        "acc-checking",
+                                        "Main Checking",
+                                        "1234",
+                                        "depository",
+                                        "checking",
+                                        new BigDecimal("200.00"),
+                                        new BigDecimal("180.00"),
+                                        "USD",
+                                        null)));
 
         Clock clock = Clock.fixed(Instant.parse("2026-06-01T12:00:00Z"), ZoneOffset.UTC);
-        BalanceSnapshotService service = new BalanceSnapshotService(
-                plaidGateway,
-                accountService,
-                repository,
-                new BalanceSnapshotConverter(),
-                clock);
+        BalanceSnapshotService service =
+                new BalanceSnapshotService(
+                        plaidGateway,
+                        accountService,
+                        repository,
+                        new BalanceSnapshotConverter(),
+                        clock);
 
-        List<BalanceSnapshot> snapshots = service.captureCurrentBalances(List.of(TestFixtures.plaidItem()));
+        List<BalanceSnapshot> snapshots =
+                service.captureCurrentBalances(List.of(TestFixtures.plaidItem()));
 
         assertThat(snapshots).hasSize(1);
         assertThat(snapshots.get(0).snapshotId()).isEqualTo("2026-06-01T12:00:00Z_acc-checking");

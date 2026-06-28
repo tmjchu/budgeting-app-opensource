@@ -15,6 +15,4 @@ public record BalanceSnapshot(
         BigDecimal currentBalance,
         BigDecimal availableBalance,
         String isoCurrencyCode,
-        String unofficialCurrencyCode
-) {
-}
+        String unofficialCurrencyCode) {}
