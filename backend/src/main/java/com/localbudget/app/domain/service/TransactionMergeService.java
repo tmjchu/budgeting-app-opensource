@@ -2,7 +2,7 @@ package com.localbudget.app.domain.service;
 
 import com.localbudget.app.converter.TransactionConverter;
 import com.localbudget.app.data.repository.TransactionCsvRepository;
-import com.localbudget.app.domain.model.Transaction;
+import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.result.TransactionMergeResult;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,18 +23,18 @@ public class TransactionMergeService {
         this.transactionConverter = transactionConverter;
     }
 
-    public TransactionMergeResult mergeIntoLocalStore(List<Transaction> fetchedTransactions) {
-        Map<String, Transaction> merged = new LinkedHashMap<>();
-        for (Transaction existing : findAll()) {
+    public TransactionMergeResult mergeIntoLocalStore(List<TransactionDO> fetchedTransactions) {
+        Map<String, TransactionDO> merged = new LinkedHashMap<>();
+        for (TransactionDO existing : findAll()) {
             merged.put(existing.transactionId(), existing);
         }
 
         int added = 0;
         int updated = 0;
         int unchanged = 0;
-        for (Transaction fetched : fetchedTransactions) {
-            Transaction existing = merged.get(fetched.transactionId());
-            Transaction candidate = preserveLocalEdits(fetched, existing);
+        for (TransactionDO fetched : fetchedTransactions) {
+            TransactionDO existing = merged.get(fetched.transactionId());
+            TransactionDO candidate = preserveLocalEdits(fetched, existing);
             if (existing == null) {
                 added++;
             } else if (!Objects.equals(existing, candidate)) {
@@ -50,15 +50,15 @@ public class TransactionMergeService {
         return new TransactionMergeResult(added, updated, unchanged);
     }
 
-    public List<Transaction> findAll() {
+    public List<TransactionDO> findAll() {
         return transactionRepository.findAll().stream().map(transactionConverter::fromCsv).toList();
     }
 
-    private Transaction preserveLocalEdits(Transaction fetched, Transaction existing) {
+    private TransactionDO preserveLocalEdits(TransactionDO fetched, TransactionDO existing) {
         if (existing == null) {
             return fetched;
         }
-        return new Transaction(
+        return new TransactionDO(
                 fetched.transactionId(),
                 fetched.plaidItemId(),
                 fetched.accountId(),

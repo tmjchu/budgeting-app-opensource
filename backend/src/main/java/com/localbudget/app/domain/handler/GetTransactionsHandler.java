@@ -1,6 +1,6 @@
 package com.localbudget.app.domain.handler;
 
-import com.localbudget.app.domain.model.Transaction;
+import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.command.TransactionQueryCommand;
 import com.localbudget.app.domain.service.TransactionQueryService;
 import java.util.List;
@@ -15,7 +15,7 @@ public class GetTransactionsHandler {
         this.transactionQueryService = transactionQueryService;
     }
 
-    public List<Transaction> handle(TransactionQueryCommand command) {
+    public List<TransactionDO> handle(TransactionQueryCommand command) {
         return transactionQueryService.find(command);
     }
 }

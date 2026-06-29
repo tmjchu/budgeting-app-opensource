@@ -3,9 +3,8 @@ package com.localbudget.app.converter;
 import com.localbudget.app.api.model.request.SelectedAccountRequest;
 import com.localbudget.app.api.model.response.AccountResponse;
 import com.localbudget.app.data.model.AccountCsvRecord;
-import com.localbudget.app.domain.model.Account;
+import com.localbudget.app.domain.model.AccountDO;
 import com.localbudget.app.domain.model.command.SelectedAccountCommand;
-import com.localbudget.app.gateway.plaid.model.PlaidLinkedAccount;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,8 +19,9 @@ public class AccountConverter {
                 request.subtype());
     }
 
-    public Account fromSelectedAccount(String plaidItemId, SelectedAccountCommand selectedAccount) {
-        return new Account(
+    public AccountDO fromSelectedAccount(
+            String plaidItemId, SelectedAccountCommand selectedAccount) {
+        return new AccountDO(
                 selectedAccount.accountId(),
                 plaidItemId,
                 selectedAccount.name(),
@@ -31,29 +31,18 @@ public class AccountConverter {
                 true);
     }
 
-    public Account fromGateway(String plaidItemId, PlaidLinkedAccount account, boolean tracked) {
-        return new Account(
-                account.accountId(),
-                plaidItemId,
-                account.name(),
-                account.mask(),
-                account.type(),
-                account.subtype(),
-                tracked);
+    public AccountDO fromCsv(AccountCsvRecord accountCsvRecord) {
+        return new AccountDO(
+                accountCsvRecord.accountId(),
+                accountCsvRecord.plaidItemId(),
+                accountCsvRecord.name(),
+                accountCsvRecord.mask(),
+                accountCsvRecord.type(),
+                accountCsvRecord.subtype(),
+                Boolean.parseBoolean(accountCsvRecord.tracked()));
     }
 
-    public Account fromCsv(AccountCsvRecord record) {
-        return new Account(
-                record.accountId(),
-                record.plaidItemId(),
-                record.name(),
-                record.mask(),
-                record.type(),
-                record.subtype(),
-                Boolean.parseBoolean(record.tracked()));
-    }
-
-    public AccountCsvRecord toCsv(Account account) {
+    public AccountCsvRecord toCsv(AccountDO account) {
         return new AccountCsvRecord(
                 account.accountId(),
                 account.plaidItemId(),
@@ -64,7 +53,7 @@ public class AccountConverter {
                 String.valueOf(account.tracked()));
     }
 
-    public AccountResponse toResponse(Account account) {
+    public AccountResponse toResponse(AccountDO account) {
         return new AccountResponse(
                 account.accountId(),
                 account.name(),

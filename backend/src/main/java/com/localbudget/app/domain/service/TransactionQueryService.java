@@ -1,6 +1,6 @@
 package com.localbudget.app.domain.service;
 
-import com.localbudget.app.domain.model.Transaction;
+import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.command.TransactionQueryCommand;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -17,7 +17,7 @@ public class TransactionQueryService {
         this.transactionMergeService = transactionMergeService;
     }
 
-    public List<Transaction> find(TransactionQueryCommand command) {
+    public List<TransactionDO> find(TransactionQueryCommand command) {
         LocalDate start = resolveStart(command);
         LocalDate end = resolveEnd(command);
         return transactionMergeService.findAll().stream()
@@ -35,13 +35,13 @@ public class TransactionQueryService {
                                         || command.category()
                                                 .equalsIgnoreCase(transaction.effectiveCategory()))
                 .sorted(
-                        Comparator.comparing(Transaction::date)
+                        Comparator.comparing(TransactionDO::date)
                                 .reversed()
-                                .thenComparing(Transaction::transactionId))
+                                .thenComparing(TransactionDO::transactionId))
                 .toList();
     }
 
-    public List<Transaction> findAll() {
+    public List<TransactionDO> findAll() {
         return transactionMergeService.findAll();
     }
 

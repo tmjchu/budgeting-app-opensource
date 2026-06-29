@@ -1,4 +1,4 @@
-package com.localbudget.app.domain.service;
+package com.localbudget.app.config;
 
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;

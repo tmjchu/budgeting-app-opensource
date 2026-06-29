@@ -11,16 +11,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class SyncRunConverter {
 
-    public SyncRun fromCsv(SyncRunCsvRecord record) {
+    public SyncRun fromCsv(SyncRunCsvRecord csvRecord) {
         return new SyncRun(
-                record.syncId(),
-                Instant.parse(record.startedAt()),
-                record.finishedAt() == null ? null : Instant.parse(record.finishedAt()),
-                SyncStatus.valueOf(record.status()),
-                parseInt(record.transactionsAdded()),
-                parseInt(record.transactionsUpdated()),
-                parseInt(record.balanceSnapshotsAdded()),
-                record.errorMessage());
+                csvRecord.syncId(),
+                Instant.parse(csvRecord.startedAt()),
+                csvRecord.finishedAt() == null ? null : Instant.parse(csvRecord.finishedAt()),
+                SyncStatus.valueOf(csvRecord.status()),
+                parseInt(csvRecord.transactionsAdded()),
+                parseInt(csvRecord.transactionsUpdated()),
+                parseInt(csvRecord.balanceSnapshotsAdded()),
+                csvRecord.errorMessage());
     }
 
     public SyncRunCsvRecord toCsv(SyncRun syncRun) {

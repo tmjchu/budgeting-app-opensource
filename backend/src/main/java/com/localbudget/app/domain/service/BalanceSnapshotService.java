@@ -2,7 +2,7 @@ package com.localbudget.app.domain.service;
 
 import com.localbudget.app.converter.BalanceSnapshotConverter;
 import com.localbudget.app.data.repository.BalanceSnapshotCsvRepository;
-import com.localbudget.app.domain.model.Account;
+import com.localbudget.app.domain.model.AccountDO;
 import com.localbudget.app.domain.model.BalanceSnapshot;
 import com.localbudget.app.domain.model.PlaidItem;
 import com.localbudget.app.gateway.plaid.api.PlaidGateway;
@@ -44,12 +44,16 @@ public class BalanceSnapshotService {
         Instant syncedAt = Instant.now(clock);
         List<BalanceSnapshot> snapshots = new ArrayList<>();
         for (PlaidItem plaidItem : plaidItems) {
-            List<Account> trackedAccounts =
+            List<AccountDO> trackedAccounts =
                     accountService.findTrackedByPlaidItemId(plaidItem.plaidItemId());
             plaidGateway.fetchBalances(plaidItem, trackedAccounts).stream()
-                    .map(balance -> balanceSnapshotConverter.fromGateway(balance, syncedAt))
+                    .map(
+                            accountBase ->
+                                    balanceSnapshotConverter.fromPlaid(
+                                            plaidItem, trackedAccounts, accountBase, syncedAt))
                     .forEach(snapshots::add);
         }
+
         balanceSnapshotRepository.appendAll(
                 snapshots.stream().map(balanceSnapshotConverter::toCsv).toList());
         return snapshots;

@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class PlaidItemConverter {
 
-    public PlaidItem fromCsv(PlaidItemCsvRecord record) {
+    public PlaidItem fromCsv(PlaidItemCsvRecord plaidItemCsvRecord) {
         return new PlaidItem(
-                record.plaidItemId(),
-                record.accessToken(),
-                record.institutionName(),
-                Instant.parse(record.createdAt()));
+                plaidItemCsvRecord.plaidItemId(),
+                plaidItemCsvRecord.accessToken(),
+                plaidItemCsvRecord.institutionName(),
+                Instant.parse(plaidItemCsvRecord.createdAt()));
     }
 
     public PlaidItemCsvRecord toCsv(PlaidItem plaidItem) {

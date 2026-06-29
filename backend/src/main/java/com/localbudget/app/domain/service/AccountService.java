@@ -2,7 +2,7 @@ package com.localbudget.app.domain.service;
 
 import com.localbudget.app.converter.AccountConverter;
 import com.localbudget.app.data.repository.AccountCsvRepository;
-import com.localbudget.app.domain.model.Account;
+import com.localbudget.app.domain.model.AccountDO;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -18,18 +18,18 @@ public class AccountService {
         this.accountConverter = accountConverter;
     }
 
-    public List<Account> findAll() {
+    public List<AccountDO> findAll() {
         return accountRepository.findAll().stream().map(accountConverter::fromCsv).toList();
     }
 
-    public List<Account> findTrackedByPlaidItemId(String plaidItemId) {
+    public List<AccountDO> findTrackedByPlaidItemId(String plaidItemId) {
         return accountRepository.findTracked().stream()
                 .map(accountConverter::fromCsv)
                 .filter(account -> plaidItemId.equals(account.plaidItemId()))
                 .toList();
     }
 
-    public void saveAll(List<Account> accounts) {
+    public void saveAll(List<AccountDO> accounts) {
         accountRepository.upsertAll(accounts.stream().map(accountConverter::toCsv).toList());
     }
 }

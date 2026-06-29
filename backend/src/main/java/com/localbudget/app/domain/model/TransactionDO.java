@@ -3,7 +3,7 @@ package com.localbudget.app.domain.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record Transaction(
+public record TransactionDO(
         String transactionId,
         String plaidItemId,
         String accountId,

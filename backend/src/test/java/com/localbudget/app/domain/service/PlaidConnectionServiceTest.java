@@ -14,6 +14,7 @@ import com.localbudget.app.domain.model.command.SelectedAccountCommand;
 import com.localbudget.app.domain.model.result.ExchangePlaidPublicTokenResult;
 import com.localbudget.app.gateway.plaid.api.PlaidGateway;
 import com.localbudget.app.gateway.plaid.model.PlaidExchangeResult;
+import com.plaid.client.model.LinkTokenCreateResponse;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -35,7 +36,8 @@ class PlaidConnectionServiceTest {
 
     @Test
     void createLinkTokenUsesCachedTokenBeforeTtlExpires() {
-        when(plaidGateway.createLinkToken()).thenReturn("link-token-1");
+        when(plaidGateway.createLinkToken())
+                .thenReturn(new LinkTokenCreateResponse().linkToken("link-token-1"));
         MutableClock clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
         PlaidConnectionService service = newService(clock);
 
@@ -50,7 +52,10 @@ class PlaidConnectionServiceTest {
 
     @Test
     void createLinkTokenRefreshesAfterTtlExpires() {
-        when(plaidGateway.createLinkToken()).thenReturn("link-token-1", "link-token-2");
+        when(plaidGateway.createLinkToken())
+                .thenReturn(
+                        new LinkTokenCreateResponse().linkToken("link-token-1"),
+                        new LinkTokenCreateResponse().linkToken("link-token-2"));
         MutableClock clock = new MutableClock(Instant.parse("2026-01-01T00:00:00Z"));
         PlaidConnectionService service = newService(clock);
 

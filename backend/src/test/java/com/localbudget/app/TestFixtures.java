@@ -1,9 +1,10 @@
 package com.localbudget.app;
 
 import com.localbudget.app.config.BudgetAppProperties;
-import com.localbudget.app.domain.model.Account;
+import com.localbudget.app.config.BudgetAppProperties.Environment;
+import com.localbudget.app.domain.model.AccountDO;
 import com.localbudget.app.domain.model.PlaidItem;
-import com.localbudget.app.domain.model.Transaction;
+import com.localbudget.app.domain.model.TransactionDO;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -17,8 +18,8 @@ public final class TestFixtures {
     public static BudgetAppProperties properties(Path dataDirectory) {
         return new BudgetAppProperties(
                 dataDirectory,
-                new BudgetAppProperties.Plaid(
-                        "https://sandbox.plaid.com",
+                new BudgetAppProperties.PlaidConfig(
+                        Environment.SANDBOX,
                         "client-id",
                         "secret",
                         "Local Budget",
@@ -26,8 +27,8 @@ public final class TestFixtures {
                         List.of("US")));
     }
 
-    public static Account checkingAccount() {
-        return new Account(
+    public static AccountDO checkingAccount() {
+        return new AccountDO(
                 "acc-checking", "item-1", "Main Checking", "1234", "depository", "checking", true);
     }
 
@@ -36,9 +37,9 @@ public final class TestFixtures {
                 "item-1", "access-token", "Test Bank", Instant.parse("2026-01-01T00:00:00Z"));
     }
 
-    public static Transaction transaction(
+    public static TransactionDO transaction(
             String id, LocalDate date, BigDecimal amount, String category) {
-        return new Transaction(
+        return new TransactionDO(
                 id,
                 "item-1",
                 "acc-checking",

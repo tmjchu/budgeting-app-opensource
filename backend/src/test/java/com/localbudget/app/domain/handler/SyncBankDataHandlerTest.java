@@ -10,7 +10,7 @@ import com.localbudget.app.domain.model.BalanceSnapshot;
 import com.localbudget.app.domain.model.PlaidItem;
 import com.localbudget.app.domain.model.SyncRun;
 import com.localbudget.app.domain.model.SyncStatus;
-import com.localbudget.app.domain.model.Transaction;
+import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.result.SyncResult;
 import com.localbudget.app.domain.model.result.TransactionMergeResult;
 import com.localbudget.app.domain.service.BalanceSnapshotService;
@@ -65,7 +65,7 @@ class SyncBankDataHandlerTest {
                         1,
                         null);
         PlaidItem plaidItem = TestFixtures.plaidItem();
-        Transaction fetched =
+        TransactionDO fetched =
                 TestFixtures.transaction(
                         "txn-1",
                         LocalDate.parse("2026-06-27"),

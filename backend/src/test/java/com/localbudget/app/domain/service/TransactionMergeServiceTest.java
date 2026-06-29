@@ -8,7 +8,7 @@ import com.localbudget.app.TestFixtures;
 import com.localbudget.app.converter.TransactionConverter;
 import com.localbudget.app.data.model.TransactionCsvRecord;
 import com.localbudget.app.data.repository.TransactionCsvRepository;
-import com.localbudget.app.domain.model.Transaction;
+import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.result.TransactionMergeResult;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,8 +28,8 @@ class TransactionMergeServiceTest {
 
     @Test
     void mergeIntoLocalStoreAddsNewTransactionsAndPreservesExistingLocalEdits() {
-        Transaction existing =
-                new Transaction(
+        TransactionDO existing =
+                new TransactionDO(
                         "txn-1",
                         "item-1",
                         "acc-checking",
@@ -44,13 +44,13 @@ class TransactionMergeServiceTest {
                         true,
                         true,
                         "in store");
-        Transaction fetchedUpdated =
+        TransactionDO fetchedUpdated =
                 TestFixtures.transaction(
                         "txn-1",
                         LocalDate.parse("2026-06-02"),
                         new BigDecimal("12.00"),
                         "FOOD_AND_DRINK");
-        Transaction fetchedNew =
+        TransactionDO fetchedNew =
                 TestFixtures.transaction(
                         "txn-2",
                         LocalDate.parse("2026-06-03"),
@@ -68,9 +68,9 @@ class TransactionMergeServiceTest {
 
         ArgumentCaptor<List<TransactionCsvRecord>> captor = ArgumentCaptor.forClass(List.class);
         verify(repository).writeAll(captor.capture());
-        List<Transaction> saved = captor.getValue().stream().map(converter::fromCsv).toList();
+        List<TransactionDO> saved = captor.getValue().stream().map(converter::fromCsv).toList();
         assertThat(saved).hasSize(2);
-        Transaction savedUpdated =
+        TransactionDO savedUpdated =
                 saved.stream()
                         .filter(transaction -> transaction.transactionId().equals("txn-1"))
                         .findFirst()

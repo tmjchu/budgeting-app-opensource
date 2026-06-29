@@ -8,11 +8,13 @@ import com.localbudget.app.TestFixtures;
 import com.localbudget.app.converter.BalanceSnapshotConverter;
 import com.localbudget.app.data.model.BalanceSnapshotCsvRecord;
 import com.localbudget.app.data.repository.BalanceSnapshotCsvRepository;
-import com.localbudget.app.domain.model.Account;
+import com.localbudget.app.domain.model.AccountDO;
 import com.localbudget.app.domain.model.BalanceSnapshot;
 import com.localbudget.app.gateway.plaid.api.PlaidGateway;
-import com.localbudget.app.gateway.plaid.model.PlaidBalance;
-import java.math.BigDecimal;
+import com.plaid.client.model.AccountBalance;
+import com.plaid.client.model.AccountBase;
+import com.plaid.client.model.AccountSubtype;
+import com.plaid.client.model.AccountType;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -32,24 +34,25 @@ class BalanceSnapshotServiceTest {
 
     @Test
     void captureCurrentBalancesFetchesOnlyTrackedAccountsAndAppendsSnapshotRows() {
-        Account account = TestFixtures.checkingAccount();
+        AccountDO account = TestFixtures.checkingAccount();
+        Instant syncedAt = Instant.parse("2026-06-01T12:00:00Z");
         when(accountService.findTrackedByPlaidItemId("item-1")).thenReturn(List.of(account));
         when(plaidGateway.fetchBalances(TestFixtures.plaidItem(), List.of(account)))
                 .thenReturn(
                         List.of(
-                                new PlaidBalance(
-                                        "item-1",
-                                        "acc-checking",
-                                        "Main Checking",
-                                        "1234",
-                                        "depository",
-                                        "checking",
-                                        new BigDecimal("200.00"),
-                                        new BigDecimal("180.00"),
-                                        "USD",
-                                        null)));
+                                new AccountBase()
+                                        .accountId("acc-checking")
+                                        .name("Main Checking")
+                                        .mask("1234")
+                                        .type(AccountType.DEPOSITORY)
+                                        .subtype(AccountSubtype.CHECKING)
+                                        .balances(
+                                                new AccountBalance()
+                                                        .current(200.00)
+                                                        .available(180.00)
+                                                        .isoCurrencyCode("USD"))));
 
-        Clock clock = Clock.fixed(Instant.parse("2026-06-01T12:00:00Z"), ZoneOffset.UTC);
+        Clock clock = Clock.fixed(syncedAt, ZoneOffset.UTC);
         BalanceSnapshotService service =
                 new BalanceSnapshotService(
                         plaidGateway,

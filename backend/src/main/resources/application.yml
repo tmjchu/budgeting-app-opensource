@@ -4,7 +4,7 @@ server:
 budget:
   data-directory: ${BUDGET_DATA_DIRECTORY:./data}
   plaid:
-    base-url: ${PLAID_BASE_URL:https://sandbox.plaid.com}
+    environment: ${PLAID_ENV:sandbox}
     client-id: ${PLAID_CLIENT_ID:}
     secret: ${PLAID_SECRET:}
     client-name: ${PLAID_CLIENT_NAME:Local Budget}

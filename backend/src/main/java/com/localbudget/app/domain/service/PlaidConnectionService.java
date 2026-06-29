@@ -3,12 +3,13 @@ package com.localbudget.app.domain.service;
 import com.localbudget.app.converter.AccountConverter;
 import com.localbudget.app.converter.PlaidItemConverter;
 import com.localbudget.app.data.repository.PlaidItemCsvRepository;
-import com.localbudget.app.domain.model.Account;
+import com.localbudget.app.domain.model.AccountDO;
 import com.localbudget.app.domain.model.PlaidItem;
 import com.localbudget.app.domain.model.command.ExchangePlaidPublicTokenCommand;
 import com.localbudget.app.domain.model.result.ExchangePlaidPublicTokenResult;
 import com.localbudget.app.gateway.plaid.api.PlaidGateway;
 import com.localbudget.app.gateway.plaid.model.PlaidExchangeResult;
+import com.plaid.client.model.LinkTokenCreateResponse;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -49,7 +50,8 @@ public class PlaidConnectionService {
             return cachedLinkToken.token();
         }
 
-        String linkToken = plaidGateway.createLinkToken();
+        LinkTokenCreateResponse response = plaidGateway.createLinkToken();
+        String linkToken = response.getLinkToken();
         cachedLinkToken = new CachedLinkToken(linkToken, now.plus(LINK_TOKEN_TTL));
         return linkToken;
     }
@@ -64,7 +66,7 @@ public class PlaidConnectionService {
                         exchangeResult.accessToken(),
                         command.institutionName(),
                         Instant.now(clock));
-        List<Account> accounts =
+        List<AccountDO> accounts =
                 command.selectedAccounts().stream()
                         .map(
                                 selectedAccount ->

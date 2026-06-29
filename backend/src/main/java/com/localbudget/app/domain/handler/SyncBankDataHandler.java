@@ -3,7 +3,7 @@ package com.localbudget.app.domain.handler;
 import com.localbudget.app.domain.model.BalanceSnapshot;
 import com.localbudget.app.domain.model.PlaidItem;
 import com.localbudget.app.domain.model.SyncRun;
-import com.localbudget.app.domain.model.Transaction;
+import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.result.SyncResult;
 import com.localbudget.app.domain.model.result.TransactionMergeResult;
 import com.localbudget.app.domain.service.BalanceSnapshotService;
@@ -51,12 +51,13 @@ public class SyncBankDataHandler {
         SyncRun syncRun = syncRunService.start();
         try {
             List<PlaidItem> connectedItems = plaidConnectionService.findConnectedItems();
+
             LocalDate endDate = LocalDate.now(clock);
             LocalDate startDate = endDate.minusDays(DEFAULT_LOOKBACK_DAYS);
 
-            List<Transaction> fetchedTransactions =
+            List<TransactionDO> fetchedTransactions =
                     transactionFetchService.fetchTransactions(connectedItems, startDate, endDate);
-            List<Transaction> normalizedTransactions =
+            List<TransactionDO> normalizedTransactions =
                     transactionRuleService.applyRules(fetchedTransactions);
             TransactionMergeResult mergeResult =
                     transactionMergeService.mergeIntoLocalStore(normalizedTransactions);

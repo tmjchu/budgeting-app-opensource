@@ -1,6 +1,6 @@
 package com.localbudget.app.domain.model;
 
-public record Account(
+public record AccountDO(
         String accountId,
         String plaidItemId,
         String name,

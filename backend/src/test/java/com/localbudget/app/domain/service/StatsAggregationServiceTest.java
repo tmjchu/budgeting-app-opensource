@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.localbudget.app.TestFixtures;
 import com.localbudget.app.domain.model.CategoryStats;
 import com.localbudget.app.domain.model.MonthlyStats;
-import com.localbudget.app.domain.model.Transaction;
+import com.localbudget.app.domain.model.TransactionDO;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -18,7 +18,7 @@ class StatsAggregationServiceTest {
 
     @Test
     void buildMonthlyStatsTreatsPositiveAmountsAsSpendingAndNegativeAmountsAsIncome() {
-        List<Transaction> transactions =
+        List<TransactionDO> transactions =
                 List.of(
                         TestFixtures.transaction(
                                 "coffee",
@@ -55,20 +55,20 @@ class StatsAggregationServiceTest {
 
     @Test
     void buildCategoryStatsGroupsSpendingByEffectiveCategory() {
-        Transaction groceries =
+        TransactionDO groceries =
                 TestFixtures.transaction(
                         "groceries",
                         LocalDate.parse("2026-06-01"),
                         new BigDecimal("80.00"),
                         "GENERAL_MERCHANDISE");
-        Transaction restaurants =
+        TransactionDO restaurants =
                 TestFixtures.transaction(
                         "restaurant",
                         LocalDate.parse("2026-06-02"),
                         new BigDecimal("40.00"),
                         "FOOD_AND_DRINK");
-        Transaction localOverride =
-                new Transaction(
+        TransactionDO localOverride =
+                new TransactionDO(
                         "coffee",
                         "item-1",
                         "acc-checking",
@@ -94,9 +94,9 @@ class StatsAggregationServiceTest {
         assertThat(stats.get(0).amount()).isEqualByComparingTo("80.00");
     }
 
-    private Transaction excluded(String id, LocalDate date, BigDecimal amount) {
-        Transaction transaction = TestFixtures.transaction(id, date, amount, "TRANSFER");
-        return new Transaction(
+    private TransactionDO excluded(String id, LocalDate date, BigDecimal amount) {
+        TransactionDO transaction = TestFixtures.transaction(id, date, amount, "TRANSFER");
+        return new TransactionDO(
                 transaction.transactionId(),
                 transaction.plaidItemId(),
                 transaction.accountId(),
