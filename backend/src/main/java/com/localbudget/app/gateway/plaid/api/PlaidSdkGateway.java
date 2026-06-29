@@ -54,6 +54,7 @@ public class PlaidSdkGateway implements PlaidGateway {
 
         ApiClient apiClient = new ApiClient();
         if (plaidConfig.environment() == PROD) {
+            System.out.println("*** YOU ARE GETTING REAL DATA ***");
             apiClient.setPlaidAdapter(ApiClient.Production);
         } else {
             apiClient.setPlaidAdapter(ApiClient.Sandbox);
