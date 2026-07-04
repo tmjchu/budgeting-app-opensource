@@ -1,0 +1,10 @@
+I want to implement the:
+1. Custom Categories
+
+in the Future plan.
+
+1. There should be Application default list of Custom Categories.
+
+2. In the UI, the user should be able to set it to a some type of a Custom Category.
+ -> Assigned Category should be saved in the database, and `transactions.csv` data should have a column with references to the Category set by the user/or by default when data is fetched
+ -> This assigned values should not override the categories passed by the DAN (Data Access Network) - in our case Plaid
