@@ -26,6 +26,11 @@ The goal is simple: connect accounts, sync transactions, see balances, review sp
 - Local CSV persistence
 - Local React dashboard
 
+## Planning
+
+- [Future development plan](docs/plan/future-development-plan.md)
+- [AI model integration plan](docs/plan/2026-07-01%20AI%20model%20integration%20for%20budgeting%20suggestions.md)
+
 ## Attribution
 
 This project was originally created by Tommy. See [NOTICE](NOTICE) for attribution details.
