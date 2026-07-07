@@ -14,6 +14,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class StatsAggregationService {
 
+    private final CategoryService categoryService;
+
+    public StatsAggregationService(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
+
     public MonthlyStats buildMonthlyStats(YearMonth month, List<TransactionDO> transactions) {
         List<TransactionDO> included =
                 transactions.stream()
@@ -37,12 +43,16 @@ public class StatsAggregationService {
 
     public List<CategoryStats> buildCategoryStats(
             YearMonth month, List<TransactionDO> transactions) {
+        Map<String, String> displayNamesById = categoryService.displayNamesById();
         Map<String, List<TransactionDO>> byCategory =
                 transactions.stream()
                         .filter(transaction -> !transaction.excluded())
                         .filter(transaction -> transaction.amount().signum() > 0)
                         .filter(transaction -> YearMonth.from(transaction.date()).equals(month))
-                        .collect(Collectors.groupingBy(TransactionDO::effectiveCategory));
+                        .collect(
+                                Collectors.groupingBy(
+                                        transaction ->
+                                                displayCategory(transaction, displayNamesById)));
 
         return byCategory.entrySet().stream()
                 .map(
@@ -55,5 +65,19 @@ public class StatsAggregationService {
                                         entry.getValue().size()))
                 .sorted(Comparator.comparing(CategoryStats::amount).reversed())
                 .toList();
+    }
+
+    private String displayCategory(
+            TransactionDO transaction, Map<String, String> displayNamesById) {
+        if (transaction.localCategoryId() != null && !transaction.localCategoryId().isBlank()) {
+            return displayNamesById.getOrDefault(transaction.localCategoryId(), "Uncategorized");
+        }
+        if (transaction.localCategory() != null && !transaction.localCategory().isBlank()) {
+            return transaction.localCategory();
+        }
+        if (transaction.primaryCategory() != null && !transaction.primaryCategory().isBlank()) {
+            return transaction.primaryCategory();
+        }
+        return displayNamesById.getOrDefault("uncategorized", "Uncategorized");
     }
 }

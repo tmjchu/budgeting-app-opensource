@@ -15,6 +15,7 @@ public record TransactionDO(
         String primaryCategory,
         String detailedCategory,
         String localCategory,
+        String localCategoryId,
         boolean pending,
         boolean excluded,
         String paymentChannel) {
@@ -26,5 +27,34 @@ public record TransactionDO(
             return primaryCategory;
         }
         return "Uncategorized";
+    }
+
+    public TransactionDO withLocalCategoryId(String nextLocalCategoryId) {
+        return new TransactionDO(
+                transactionId,
+                plaidItemId,
+                accountId,
+                accountName,
+                date,
+                name,
+                merchantName,
+                amount,
+                primaryCategory,
+                detailedCategory,
+                null,
+                nextLocalCategoryId,
+                pending,
+                excluded,
+                paymentChannel);
+    }
+
+    public TransactionDO withLocalCategoryIdIfUnassigned(String nextLocalCategoryId) {
+        if (localCategoryId != null && !localCategoryId.isBlank()) {
+            return this;
+        }
+        if (localCategory != null && !localCategory.isBlank()) {
+            return this;
+        }
+        return withLocalCategoryId(nextLocalCategoryId);
     }
 }

@@ -29,6 +29,7 @@ public class TransactionRuleService {
                 transaction.primaryCategory(),
                 transaction.detailedCategory(),
                 transaction.localCategory(),
+                transaction.localCategoryId(),
                 transaction.pending(),
                 true,
                 transaction.paymentChannel());

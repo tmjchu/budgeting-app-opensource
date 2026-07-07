@@ -7,6 +7,7 @@ import com.localbudget.app.domain.model.result.TransactionMergeResult;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +16,15 @@ public class TransactionMergeService {
 
     private final TransactionCsvRepository transactionRepository;
     private final TransactionConverter transactionConverter;
+    private final CategoryMappingService categoryMappingService;
 
     public TransactionMergeService(
             TransactionCsvRepository transactionRepository,
-            TransactionConverter transactionConverter) {
+            TransactionConverter transactionConverter,
+            CategoryMappingService categoryMappingService) {
         this.transactionRepository = transactionRepository;
         this.transactionConverter = transactionConverter;
+        this.categoryMappingService = categoryMappingService;
     }
 
     public TransactionMergeResult mergeIntoLocalStore(List<TransactionDO> fetchedTransactions) {
@@ -34,7 +38,10 @@ public class TransactionMergeService {
         int unchanged = 0;
         for (TransactionDO fetched : fetchedTransactions) {
             TransactionDO existing = merged.get(fetched.transactionId());
-            TransactionDO candidate = preserveLocalEdits(fetched, existing);
+            TransactionDO candidate =
+                    preserveLocalEdits(fetched, existing)
+                            .withLocalCategoryIdIfUnassigned(
+                                    categoryMappingService.defaultCategoryId(fetched));
             if (existing == null) {
                 added++;
             } else if (!Objects.equals(existing, candidate)) {
@@ -54,6 +61,30 @@ public class TransactionMergeService {
         return transactionRepository.findAll().stream().map(transactionConverter::fromCsv).toList();
     }
 
+    public TransactionDO updateLocalCategory(String transactionId, String categoryId) {
+        List<TransactionDO> transactions = findAll();
+        boolean found =
+                transactions.stream()
+                        .anyMatch(transaction -> transaction.transactionId().equals(transactionId));
+        if (!found) {
+            throw new NoSuchElementException("Transaction not found: " + transactionId);
+        }
+
+        List<TransactionDO> updated =
+                transactions.stream()
+                        .map(
+                                transaction ->
+                                        transaction.transactionId().equals(transactionId)
+                                                ? transaction.withLocalCategoryId(categoryId)
+                                                : transaction)
+                        .toList();
+        transactionRepository.writeAll(updated.stream().map(transactionConverter::toCsv).toList());
+        return updated.stream()
+                .filter(transaction -> transaction.transactionId().equals(transactionId))
+                .findFirst()
+                .orElseThrow();
+    }
+
     private TransactionDO preserveLocalEdits(TransactionDO fetched, TransactionDO existing) {
         if (existing == null) {
             return fetched;
@@ -70,6 +101,7 @@ public class TransactionMergeService {
                 fetched.primaryCategory(),
                 fetched.detailedCategory(),
                 existing.localCategory(),
+                existing.localCategoryId(),
                 fetched.pending(),
                 existing.excluded(),
                 fetched.paymentChannel());

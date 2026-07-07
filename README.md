@@ -65,6 +65,7 @@ The backend writes local CSV data under `backend/data` by default:
 
 - `accounts.csv`
 - `plaid_items.csv`
+- `categories.csv`
 - `transactions.csv`
 - `balance_snapshots.csv`
 - `sync_runs.csv`
