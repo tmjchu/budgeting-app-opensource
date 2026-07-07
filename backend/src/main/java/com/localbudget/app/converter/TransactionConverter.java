@@ -3,6 +3,7 @@ package com.localbudget.app.converter;
 import com.localbudget.app.api.model.response.TransactionResponse;
 import com.localbudget.app.data.model.TransactionCsvRecord;
 import com.localbudget.app.domain.model.AccountDO;
+import com.localbudget.app.domain.model.CategoryDefaults;
 import com.localbudget.app.domain.model.PlaidItem;
 import com.localbudget.app.domain.model.TransactionDO;
 import com.plaid.client.model.PersonalFinanceCategory;
@@ -38,6 +39,7 @@ public class TransactionConverter {
                 category == null ? null : category.getPrimary(),
                 category == null ? null : category.getDetailed(),
                 null,
+                null,
                 Boolean.TRUE.equals(transaction.getPending()),
                 false,
                 value(transaction.getPaymentChannel()));
@@ -56,6 +58,7 @@ public class TransactionConverter {
                 transactionCsvRecord.primaryCategory(),
                 transactionCsvRecord.detailedCategory(),
                 transactionCsvRecord.localCategory(),
+                localCategoryId(transactionCsvRecord.localCategoryId(), transactionCsvRecord.localCategory()),
                 Boolean.parseBoolean(transactionCsvRecord.pending()),
                 Boolean.parseBoolean(transactionCsvRecord.excluded()),
                 transactionCsvRecord.paymentChannel());
@@ -76,10 +79,11 @@ public class TransactionConverter {
                 transaction.localCategory(),
                 String.valueOf(transaction.pending()),
                 String.valueOf(transaction.excluded()),
-                transaction.paymentChannel());
+                transaction.paymentChannel(),
+                transaction.localCategoryId());
     }
 
-    public TransactionResponse toResponse(TransactionDO transaction) {
+    public TransactionResponse toResponse(TransactionDO transaction, String categoryDisplayName) {
         return new TransactionResponse(
                 transaction.transactionId(),
                 transaction.accountId(),
@@ -88,7 +92,11 @@ public class TransactionConverter {
                 transaction.name(),
                 transaction.merchantName(),
                 transaction.amount(),
-                transaction.effectiveCategory(),
+                categoryDisplayName,
+                transaction.localCategoryId(),
+                assignedCategoryName(transaction, categoryDisplayName),
+                transaction.primaryCategory(),
+                transaction.detailedCategory(),
                 transaction.pending(),
                 transaction.excluded(),
                 transaction.paymentChannel());
@@ -104,5 +112,25 @@ public class TransactionConverter {
 
     private static String value(Object value) {
         return value == null ? null : value.toString();
+    }
+
+    private static String localCategoryId(String localCategoryId, String legacyLocalCategory) {
+        if (localCategoryId != null && !localCategoryId.isBlank()) {
+            return localCategoryId;
+        }
+        return legacyLocalCategory == null || legacyLocalCategory.isBlank()
+                ? null
+                : CategoryDefaults.categoryIdForDisplayName(legacyLocalCategory).orElse(null);
+    }
+
+    private static String assignedCategoryName(
+            TransactionDO transaction, String categoryDisplayName) {
+        if (transaction.localCategoryId() != null && !transaction.localCategoryId().isBlank()) {
+            return categoryDisplayName;
+        }
+        if (transaction.localCategory() != null && !transaction.localCategory().isBlank()) {
+            return categoryDisplayName;
+        }
+        return null;
     }
 }

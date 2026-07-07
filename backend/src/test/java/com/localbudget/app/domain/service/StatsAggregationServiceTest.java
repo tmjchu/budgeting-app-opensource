@@ -3,6 +3,8 @@ package com.localbudget.app.domain.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.localbudget.app.TestFixtures;
+import com.localbudget.app.converter.CategoryConverter;
+import com.localbudget.app.data.repository.CategoryCsvRepository;
 import com.localbudget.app.domain.model.CategoryStats;
 import com.localbudget.app.domain.model.MonthlyStats;
 import com.localbudget.app.domain.model.TransactionDO;
@@ -11,10 +13,11 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class StatsAggregationServiceTest {
 
-    private final StatsAggregationService service = new StatsAggregationService();
+    @TempDir java.nio.file.Path dataDirectory;
 
     @Test
     void buildMonthlyStatsTreatsPositiveAmountsAsSpendingAndNegativeAmountsAsIncome() {
@@ -45,7 +48,8 @@ class StatsAggregationServiceTest {
                                 LocalDate.parse("2026-06-04"),
                                 new BigDecimal("50.00")));
 
-        MonthlyStats stats = service.buildMonthlyStats(YearMonth.parse("2026-06"), transactions);
+        MonthlyStats stats =
+                newService().buildMonthlyStats(YearMonth.parse("2026-06"), transactions);
 
         assertThat(stats.income()).isEqualByComparingTo("4000.00");
         assertThat(stats.spending()).isEqualByComparingTo("1805.25");
@@ -80,18 +84,28 @@ class StatsAggregationServiceTest {
                         "FOOD_AND_DRINK",
                         "FOOD_AND_DRINK_COFFEE",
                         "Treats",
+                        null,
                         false,
                         false,
                         "in store");
+        TransactionDO assignedGroceries =
+                TestFixtures.transaction(
+                                "assigned",
+                                LocalDate.parse("2026-06-04"),
+                                new BigDecimal("90.00"),
+                                "GENERAL_MERCHANDISE")
+                        .withLocalCategoryId("groceries");
 
         List<CategoryStats> stats =
-                service.buildCategoryStats(
-                        YearMonth.parse("2026-06"), List.of(groceries, restaurants, localOverride));
+                newService()
+                        .buildCategoryStats(
+                                YearMonth.parse("2026-06"),
+                                List.of(groceries, restaurants, localOverride, assignedGroceries));
 
         assertThat(stats)
                 .extracting(CategoryStats::category)
-                .containsExactly("GENERAL_MERCHANDISE", "FOOD_AND_DRINK", "Treats");
-        assertThat(stats.get(0).amount()).isEqualByComparingTo("80.00");
+                .containsExactly("Groceries", "GENERAL_MERCHANDISE", "FOOD_AND_DRINK", "Treats");
+        assertThat(stats.get(0).amount()).isEqualByComparingTo("90.00");
     }
 
     private TransactionDO excluded(String id, LocalDate date, BigDecimal amount) {
@@ -108,8 +122,17 @@ class StatsAggregationServiceTest {
                 transaction.primaryCategory(),
                 transaction.detailedCategory(),
                 transaction.localCategory(),
+                transaction.localCategoryId(),
                 transaction.pending(),
                 true,
                 transaction.paymentChannel());
+    }
+
+    private StatsAggregationService newService() {
+        CategoryConverter converter = new CategoryConverter();
+        return new StatsAggregationService(
+                new CategoryService(
+                        new CategoryCsvRepository(TestFixtures.properties(dataDirectory), converter),
+                        converter));
     }
 }

@@ -12,6 +12,10 @@ public record TransactionResponse(
         String merchantName,
         BigDecimal amount,
         String category,
+        String assignedCategoryId,
+        String assignedCategoryName,
+        String primaryCategory,
+        String detailedCategory,
         boolean pending,
         boolean excluded,
         String paymentChannel) {}

@@ -3,6 +3,7 @@ package com.localbudget.app.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.localbudget.app.TestFixtures;
+import com.localbudget.app.api.model.response.TransactionResponse;
 import com.localbudget.app.data.model.TransactionCsvRecord;
 import com.localbudget.app.domain.model.TransactionDO;
 import com.plaid.client.model.PersonalFinanceCategory;
@@ -46,6 +47,7 @@ class TransactionConverterTest {
         assertThat(transaction.primaryCategory()).isEqualTo("FOOD_AND_DRINK");
         assertThat(transaction.detailedCategory()).isEqualTo("FOOD_AND_DRINK_COFFEE");
         assertThat(transaction.localCategory()).isNull();
+        assertThat(transaction.localCategoryId()).isNull();
         assertThat(transaction.pending()).isTrue();
         assertThat(transaction.excluded()).isFalse();
         assertThat(transaction.paymentChannel()).isEqualTo("in store");
@@ -78,5 +80,51 @@ class TransactionConverterTest {
         assertThat(csvRecord.pending()).isEqualTo("false");
         assertThat(csvRecord.excluded()).isEqualTo("false");
         assertThat(csvRecord.paymentChannel()).isEqualTo("online");
+        assertThat(csvRecord.localCategoryId()).isNull();
+    }
+
+    @Test
+    void fromCsvDerivesCategoryIdFromLegacyLocalCategoryWhenPossible() {
+        TransactionCsvRecord csvRecord =
+                new TransactionCsvRecord(
+                        "txn-legacy",
+                        "item-1",
+                        "acc-checking",
+                        "Main Checking",
+                        "2026-06-29",
+                        "Coffee",
+                        "Coffee Merchant",
+                        "12.34",
+                        "FOOD_AND_DRINK",
+                        "FOOD_AND_DRINK_COFFEE",
+                        "Dining & Drinks",
+                        "false",
+                        "false",
+                        "in store",
+                        null);
+
+        TransactionDO transaction = converter.fromCsv(csvRecord);
+
+        assertThat(transaction.localCategory()).isEqualTo("Dining & Drinks");
+        assertThat(transaction.localCategoryId()).isEqualTo("dining-drinks");
+    }
+
+    @Test
+    void toResponseIncludesAssignedAndPlaidCategoryFields() {
+        TransactionDO transaction =
+                TestFixtures.transaction(
+                                "txn-3",
+                                LocalDate.parse("2026-06-29"),
+                                new BigDecimal("12.34"),
+                                "FOOD_AND_DRINK")
+                        .withLocalCategoryId("dining-drinks");
+
+        TransactionResponse response = converter.toResponse(transaction, "Dining & Drinks");
+
+        assertThat(response.category()).isEqualTo("Dining & Drinks");
+        assertThat(response.assignedCategoryId()).isEqualTo("dining-drinks");
+        assertThat(response.assignedCategoryName()).isEqualTo("Dining & Drinks");
+        assertThat(response.primaryCategory()).isEqualTo("FOOD_AND_DRINK");
+        assertThat(response.detailedCategory()).isEqualTo("FOOD_AND_DRINK_DETAIL");
     }
 }

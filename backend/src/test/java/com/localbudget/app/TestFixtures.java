@@ -51,6 +51,7 @@ public final class TestFixtures {
                 category,
                 category == null ? null : category + "_DETAIL",
                 null,
+                null,
                 false,
                 false,
                 "in store");

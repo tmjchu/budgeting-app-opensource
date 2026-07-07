@@ -18,7 +18,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -70,6 +71,7 @@ h2 {
 }
 
 .month-input,
+.category-select,
 .button {
   min-height: 40px;
   border: 1px solid #cbd3ca;
@@ -77,6 +79,12 @@ h2 {
   padding: 0 12px;
   background: #ffffff;
   color: #17251d;
+}
+
+.category-select {
+  width: min(220px, 100%);
+  min-height: 36px;
+  padding-right: 28px;
 }
 
 .button {

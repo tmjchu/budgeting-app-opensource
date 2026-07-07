@@ -12,9 +12,12 @@ import org.springframework.stereotype.Service;
 public class TransactionQueryService {
 
     private final TransactionMergeService transactionMergeService;
+    private final CategoryService categoryService;
 
-    public TransactionQueryService(TransactionMergeService transactionMergeService) {
+    public TransactionQueryService(
+            TransactionMergeService transactionMergeService, CategoryService categoryService) {
         this.transactionMergeService = transactionMergeService;
+        this.categoryService = categoryService;
     }
 
     public List<TransactionDO> find(TransactionQueryCommand command) {
@@ -33,7 +36,7 @@ public class TransactionQueryService {
                                 command.category() == null
                                         || command.category().isBlank()
                                         || command.category()
-                                                .equalsIgnoreCase(transaction.effectiveCategory()))
+                                                .equalsIgnoreCase(displayCategory(transaction)))
                 .sorted(
                         Comparator.comparing(TransactionDO::date)
                                 .reversed()
@@ -59,5 +62,12 @@ public class TransactionQueryService {
         }
         YearMonth month = command.month() == null ? YearMonth.now() : command.month();
         return month.atEndOfMonth();
+    }
+
+    private String displayCategory(TransactionDO transaction) {
+        return categoryService.displayCategoryForTransaction(
+                transaction.localCategoryId(),
+                transaction.localCategory(),
+                transaction.primaryCategory());
     }
 }

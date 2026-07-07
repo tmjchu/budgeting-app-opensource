@@ -62,6 +62,9 @@ abstract class CsvSupport {
     }
 
     protected static String value(CSVRecord record, String key) {
+        if (!record.isMapped(key) || !record.isSet(key)) {
+            return null;
+        }
         String value = record.get(key);
         return value == null || value.isBlank() ? null : value;
     }

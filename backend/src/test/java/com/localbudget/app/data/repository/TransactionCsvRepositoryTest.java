@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.localbudget.app.TestFixtures;
 import com.localbudget.app.data.model.TransactionCsvRecord;
+
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -14,7 +17,7 @@ class TransactionCsvRepositoryTest {
     @TempDir Path dataDirectory;
 
     @Test
-    void writeAllSortsByDateDescendingAndRoundTripsQuotedText() {
+    void writeAllSortsByDateDescendingAndRoundTripsQuotedText() throws IOException {
         TransactionCsvRepository repository =
                 new TransactionCsvRepository(TestFixtures.properties(dataDirectory));
 
@@ -30,6 +33,29 @@ class TransactionCsvRepositoryTest {
                 .get()
                 .extracting(TransactionCsvRecord::merchantName)
                 .isEqualTo("Market \"Special\"");
+        assertThat(Files.readString(dataDirectory.resolve("transactions.csv")))
+                .startsWith(
+                        "transaction_id,plaid_item_id,account_id,account_name,date,name,merchant_name,amount,primary_category,detailed_category,local_category,pending,excluded,payment_channel,local_category_id");
+    }
+
+    @Test
+    void readsOldTransactionCsvWithoutLocalCategoryId() throws Exception {
+        Files.writeString(
+                dataDirectory.resolve("transactions.csv"),
+                """
+                transaction_id,plaid_item_id,account_id,account_name,date,name,merchant_name,amount,primary_category,detailed_category,local_category,pending,excluded,payment_channel
+                txn-old,item-1,acc-1,Checking,2026-01-01,Name,Merchant,12.34,FOOD_AND_DRINK,FOOD_AND_DRINK_COFFEE,Dining & Drinks,false,false,in store
+                """);
+        TransactionCsvRepository repository =
+                new TransactionCsvRepository(TestFixtures.properties(dataDirectory));
+
+        TransactionCsvRecord record = repository.findAll().getFirst();
+
+        assertThat(record.localCategory()).isEqualTo("Dining & Drinks");
+        assertThat(record.pending()).isEqualTo("false");
+        assertThat(record.excluded()).isEqualTo("false");
+        assertThat(record.paymentChannel()).isEqualTo("in store");
+        assertThat(record.localCategoryId()).isNull();
     }
 
     private TransactionCsvRecord transaction(String id, String date, String merchantName) {
@@ -47,6 +73,7 @@ class TransactionCsvRepositoryTest {
                 null,
                 "false",
                 "false",
-                "in store");
+                "in store",
+                null);
     }
 }

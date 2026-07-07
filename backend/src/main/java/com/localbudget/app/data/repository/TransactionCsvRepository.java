@@ -28,7 +28,8 @@ public class TransactionCsvRepository extends CsvSupport {
         "local_category",
         "pending",
         "excluded",
-        "payment_channel"
+        "payment_channel",
+        "local_category_id"
     };
 
     public TransactionCsvRepository(BudgetAppProperties properties) {
@@ -53,7 +54,8 @@ public class TransactionCsvRepository extends CsvSupport {
                                         value(record, "local_category"),
                                         value(record, "pending"),
                                         value(record, "excluded"),
-                                        value(record, "payment_channel")))
+                                        value(record, "payment_channel"),
+                                        value(record, "local_category_id")))
                 .toList();
     }
 
@@ -89,7 +91,8 @@ public class TransactionCsvRepository extends CsvSupport {
                                                 value(record.localCategory()),
                                                 value(record.pending()),
                                                 value(record.excluded()),
-                                                value(record.paymentChannel())))
+                                                value(record.paymentChannel()),
+                                                value(record.localCategoryId())))
                         .toList());
     }
 
