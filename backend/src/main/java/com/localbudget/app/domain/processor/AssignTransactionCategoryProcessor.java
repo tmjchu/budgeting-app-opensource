@@ -6,21 +6,17 @@ import com.localbudget.app.domain.model.command.AssignTransactionCategoryCommand
 import com.localbudget.app.domain.service.CategoryService;
 import com.localbudget.app.domain.service.TransactionService;
 import java.util.NoSuchElementException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
+@RequiredArgsConstructor
 public class AssignTransactionCategoryProcessor {
 
     private final CategoryService categoryService;
     private final TransactionService transactionService;
-
-    public AssignTransactionCategoryProcessor(
-            CategoryService categoryService, TransactionService transactionService) {
-        this.categoryService = categoryService;
-        this.transactionService = transactionService;
-    }
 
     public TransactionView handle(AssignTransactionCategoryCommand command) {
         categoryService

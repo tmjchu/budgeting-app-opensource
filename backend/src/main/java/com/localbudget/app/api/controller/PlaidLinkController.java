@@ -9,6 +9,7 @@ import com.localbudget.app.domain.processor.CreatePlaidLinkTokenProcessor;
 import com.localbudget.app.domain.processor.ExchangePlaidPublicTokenProcessor;
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,20 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/plaid")
+@RequiredArgsConstructor
 public class PlaidLinkController {
 
     private final CreatePlaidLinkTokenProcessor createPlaidLinkTokenProcessor;
     private final ExchangePlaidPublicTokenProcessor exchangePlaidPublicTokenProcessor;
     private final AccountConverter accountConverter;
-
-    public PlaidLinkController(
-            CreatePlaidLinkTokenProcessor createPlaidLinkTokenProcessor,
-            ExchangePlaidPublicTokenProcessor exchangePlaidPublicTokenProcessor,
-            AccountConverter accountConverter) {
-        this.createPlaidLinkTokenProcessor = createPlaidLinkTokenProcessor;
-        this.exchangePlaidPublicTokenProcessor = exchangePlaidPublicTokenProcessor;
-        this.accountConverter = accountConverter;
-    }
 
     @PostMapping("/link-token")
     public LinkTokenResponse createLinkToken() {

@@ -10,16 +10,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class StatsAggregationService {
 
     private final TransactionServiceHelper transactionServiceHelper;
-
-    public StatsAggregationService(TransactionServiceHelper transactionServiceHelper) {
-        this.transactionServiceHelper = transactionServiceHelper;
-    }
 
     public MonthlyStats buildMonthlyStats(YearMonth month, List<TransactionDO> transactions) {
         List<TransactionDO> included =

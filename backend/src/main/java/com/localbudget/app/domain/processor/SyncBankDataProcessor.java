@@ -18,9 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SyncBankDataProcessor {
 
     private static final int DEFAULT_LOOKBACK_DAYS = 365;
@@ -31,21 +33,6 @@ public class SyncBankDataProcessor {
     private final TransactionService transactionService;
     private final BalanceSnapshotService balanceSnapshotService;
     private final Clock clock;
-
-    public SyncBankDataProcessor(
-            SyncRunService syncRunService,
-            PlaidConnectionService plaidConnectionService,
-            AccountService accountService,
-            TransactionService transactionService,
-            BalanceSnapshotService balanceSnapshotService,
-            Clock clock) {
-        this.syncRunService = syncRunService;
-        this.plaidConnectionService = plaidConnectionService;
-        this.accountService = accountService;
-        this.transactionService = transactionService;
-        this.balanceSnapshotService = balanceSnapshotService;
-        this.clock = clock;
-    }
 
     public SyncResult handle() {
         SyncRun syncRun = syncRunService.start();

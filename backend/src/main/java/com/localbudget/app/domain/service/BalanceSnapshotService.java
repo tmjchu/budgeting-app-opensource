@@ -11,26 +11,17 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class BalanceSnapshotService {
 
     private final PlaidGateway plaidGateway;
     private final BalanceSnapshotCsvRepository balanceSnapshotRepository;
     private final BalanceSnapshotConverter balanceSnapshotConverter;
     private final Clock clock;
-
-    public BalanceSnapshotService(
-            PlaidGateway plaidGateway,
-            BalanceSnapshotCsvRepository balanceSnapshotRepository,
-            BalanceSnapshotConverter balanceSnapshotConverter,
-            Clock clock) {
-        this.plaidGateway = plaidGateway;
-        this.balanceSnapshotRepository = balanceSnapshotRepository;
-        this.balanceSnapshotConverter = balanceSnapshotConverter;
-        this.clock = clock;
-    }
 
     public List<BalanceSnapshot> findAll() {
         return balanceSnapshotRepository.findAll().stream()

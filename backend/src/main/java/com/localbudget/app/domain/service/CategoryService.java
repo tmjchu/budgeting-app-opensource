@@ -9,21 +9,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
 
     private static final String UNCATEGORIZED_ID = "uncategorized";
 
     private final CategoryCsvRepository categoryRepository;
     private final CategoryConverter categoryConverter;
-
-    public CategoryService(
-            CategoryCsvRepository categoryRepository, CategoryConverter categoryConverter) {
-        this.categoryRepository = categoryRepository;
-        this.categoryConverter = categoryConverter;
-    }
 
     public List<CategoryDO> findAll() {
         return categoryRepository.findAll().stream()

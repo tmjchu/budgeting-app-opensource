@@ -8,23 +8,16 @@ import com.localbudget.app.domain.model.result.TransactionMergeResult;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SyncRunService {
 
     private final SyncRunCsvRepository syncRunRepository;
     private final SyncRunConverter syncRunConverter;
     private final Clock clock;
-
-    public SyncRunService(
-            SyncRunCsvRepository syncRunRepository,
-            SyncRunConverter syncRunConverter,
-            Clock clock) {
-        this.syncRunRepository = syncRunRepository;
-        this.syncRunConverter = syncRunConverter;
-        this.clock = clock;
-    }
 
     public SyncRun start() {
         SyncRun syncRun =

@@ -19,26 +19,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
     private final PlaidGateway plaidGateway;
     private final TransactionCsvRepository transactionRepository;
     private final TransactionConverter transactionConverter;
     private final TransactionServiceHelper transactionServiceHelper;
-
-    public TransactionService(
-            PlaidGateway plaidGateway,
-            TransactionCsvRepository transactionRepository,
-            TransactionConverter transactionConverter,
-            TransactionServiceHelper transactionServiceHelper) {
-        this.plaidGateway = plaidGateway;
-        this.transactionRepository = transactionRepository;
-        this.transactionConverter = transactionConverter;
-        this.transactionServiceHelper = transactionServiceHelper;
-    }
 
     public List<TransactionDO> fetchTransactions(
             List<PlaidItem> plaidItems,

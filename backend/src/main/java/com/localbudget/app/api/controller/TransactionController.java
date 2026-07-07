@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,20 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/transactions")
+@RequiredArgsConstructor
 public class TransactionController {
 
     private final GetTransactionsProcessor getTransactionsProcessor;
     private final AssignTransactionCategoryProcessor assignTransactionCategoryProcessor;
     private final TransactionConverter transactionConverter;
-
-    public TransactionController(
-            GetTransactionsProcessor getTransactionsProcessor,
-            AssignTransactionCategoryProcessor assignTransactionCategoryProcessor,
-            TransactionConverter transactionConverter) {
-        this.getTransactionsProcessor = getTransactionsProcessor;
-        this.assignTransactionCategoryProcessor = assignTransactionCategoryProcessor;
-        this.transactionConverter = transactionConverter;
-    }
 
     @GetMapping
     public List<TransactionResponse> getTransactions(

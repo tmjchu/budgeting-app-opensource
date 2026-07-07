@@ -15,9 +15,11 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PlaidConnectionService {
 
     private static final Duration LINK_TOKEN_TTL = Duration.ofMinutes(30);
@@ -29,21 +31,6 @@ public class PlaidConnectionService {
     private final AccountConverter accountConverter;
     private final Clock clock;
     private CachedLinkToken cachedLinkToken;
-
-    public PlaidConnectionService(
-            PlaidGateway plaidGateway,
-            PlaidItemCsvRepository plaidItemRepository,
-            AccountCsvRepository accountRepository,
-            PlaidItemConverter plaidItemConverter,
-            AccountConverter accountConverter,
-            Clock clock) {
-        this.plaidGateway = plaidGateway;
-        this.plaidItemRepository = plaidItemRepository;
-        this.accountRepository = accountRepository;
-        this.plaidItemConverter = plaidItemConverter;
-        this.accountConverter = accountConverter;
-        this.clock = clock;
-    }
 
     public synchronized String createLinkToken() {
         Instant now = Instant.now(clock);

@@ -8,6 +8,7 @@ import com.localbudget.app.domain.processor.GetCategoryStatsProcessor;
 import com.localbudget.app.domain.processor.GetMonthlyStatsProcessor;
 import java.time.YearMonth;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,17 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/stats")
+@RequiredArgsConstructor
 public class StatsController {
 
     private final GetMonthlyStatsProcessor getMonthlyStatsProcessor;
     private final GetCategoryStatsProcessor getCategoryStatsProcessor;
-
-    public StatsController(
-            GetMonthlyStatsProcessor getMonthlyStatsProcessor,
-            GetCategoryStatsProcessor getCategoryStatsProcessor) {
-        this.getMonthlyStatsProcessor = getMonthlyStatsProcessor;
-        this.getCategoryStatsProcessor = getCategoryStatsProcessor;
-    }
 
     @GetMapping("/monthly")
     public MonthlyStatsResponse getMonthlyStats(
