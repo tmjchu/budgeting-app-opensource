@@ -3,21 +3,18 @@ package com.localbudget.app.domain.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.localbudget.app.TestFixtures;
-import com.localbudget.app.converter.CategoryConverter;
-import com.localbudget.app.data.repository.CategoryCsvRepository;
 import com.localbudget.app.domain.model.CategoryStats;
 import com.localbudget.app.domain.model.MonthlyStats;
 import com.localbudget.app.domain.model.TransactionDO;
+import com.localbudget.app.domain.service.helper.TransactionServiceHelper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 class StatsAggregationServiceTest {
-
-    @TempDir java.nio.file.Path dataDirectory;
 
     @Test
     void buildMonthlyStatsTreatsPositiveAmountsAsSpendingAndNegativeAmountsAsIncome() {
@@ -100,7 +97,8 @@ class StatsAggregationServiceTest {
                 newService()
                         .buildCategoryStats(
                                 YearMonth.parse("2026-06"),
-                                List.of(groceries, restaurants, localOverride, assignedGroceries));
+                                List.of(groceries, restaurants, localOverride, assignedGroceries),
+                                Map.of("groceries", "Groceries"));
 
         assertThat(stats)
                 .extracting(CategoryStats::category)
@@ -129,10 +127,6 @@ class StatsAggregationServiceTest {
     }
 
     private StatsAggregationService newService() {
-        CategoryConverter converter = new CategoryConverter();
-        return new StatsAggregationService(
-                new CategoryService(
-                        new CategoryCsvRepository(TestFixtures.properties(dataDirectory), converter),
-                        converter));
+        return new StatsAggregationService(new TransactionServiceHelper());
     }
 }

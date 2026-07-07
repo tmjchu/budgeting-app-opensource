@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.localbudget.app.domain.model.CategoryDO;
-import com.localbudget.app.domain.service.CategoryService;
+import com.localbudget.app.domain.processor.GetCategoriesProcessor;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -15,11 +15,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {
 
-    @Mock private CategoryService categoryService;
+    @Mock private GetCategoriesProcessor getCategoriesProcessor;
 
     @Test
     void getCategoriesReturnsCategoryResponses() {
-        when(categoryService.findAll())
+        when(getCategoriesProcessor.handle())
                 .thenReturn(
                         List.of(
                                 new CategoryDO(
@@ -32,7 +32,7 @@ class CategoryControllerTest {
                                         Instant.parse("2026-01-01T00:00:00Z"),
                                         Instant.parse("2026-01-02T00:00:00Z"))));
 
-        assertThat(new CategoryController(categoryService).getCategories())
+        assertThat(new CategoryController(getCategoriesProcessor).getCategories())
                 .singleElement()
                 .satisfies(
                         response -> {

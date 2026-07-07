@@ -1,16 +1,18 @@
-package com.localbudget.app.domain.service;
+package com.localbudget.app.domain.service.helper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.localbudget.app.domain.model.TransactionDO;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class CategoryMappingServiceTest {
+class TransactionServiceHelperTest {
 
-    private final CategoryMappingService service = new CategoryMappingService();
+    private final TransactionServiceHelper helper = new TransactionServiceHelper();
 
     @ParameterizedTest
     @CsvSource({
@@ -46,11 +48,37 @@ class CategoryMappingServiceTest {
     })
     void defaultCategoryIdMapsPlaidCategories(
             String detailedCategory, String primaryCategory, String expectedCategoryId) {
-        assertThat(service.defaultCategoryId(transaction(primaryCategory, detailedCategory)))
+        assertThat(helper.defaultCategoryId(transaction(primaryCategory, detailedCategory, null, null)))
                 .isEqualTo(expectedCategoryId);
     }
 
-    private TransactionDO transaction(String primaryCategory, String detailedCategory) {
+    @Test
+    void displayCategoryPrefersAssignedCategoryThenLegacyThenPrimaryThenUncategorized() {
+        Map<String, String> displayNamesById = Map.of("groceries", "Groceries");
+
+        assertThat(
+                        helper.displayCategory(
+                                transaction("FOOD", "FOOD_DETAIL", null, "groceries"),
+                                displayNamesById))
+                .isEqualTo("Groceries");
+        assertThat(
+                        helper.displayCategory(
+                                transaction("FOOD", "FOOD_DETAIL", "Legacy", null),
+                                displayNamesById))
+                .isEqualTo("Legacy");
+        assertThat(
+                        helper.displayCategory(
+                                transaction("FOOD", "FOOD_DETAIL", null, null), displayNamesById))
+                .isEqualTo("FOOD");
+        assertThat(helper.displayCategory(transaction(null, null, null, null), Map.of()))
+                .isEqualTo("Uncategorized");
+    }
+
+    private TransactionDO transaction(
+            String primaryCategory,
+            String detailedCategory,
+            String legacyLocalCategory,
+            String localCategoryId) {
         return new TransactionDO(
                 "txn-1",
                 "item-1",
@@ -62,8 +90,8 @@ class CategoryMappingServiceTest {
                 new BigDecimal("12.00"),
                 primaryCategory,
                 detailedCategory,
-                null,
-                null,
+                legacyLocalCategory,
+                localCategoryId,
                 false,
                 false,
                 "in store");

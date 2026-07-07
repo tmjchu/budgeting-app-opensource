@@ -10,10 +10,16 @@ import com.localbudget.app.converter.TransactionConverter;
 import com.localbudget.app.data.model.TransactionCsvRecord;
 import com.localbudget.app.data.repository.TransactionCsvRepository;
 import com.localbudget.app.domain.model.TransactionDO;
+import com.localbudget.app.domain.model.TransactionView;
+import com.localbudget.app.domain.model.command.TransactionQueryCommand;
 import com.localbudget.app.domain.model.result.TransactionMergeResult;
+import com.localbudget.app.domain.service.helper.TransactionServiceHelper;
+import com.localbudget.app.gateway.plaid.api.PlaidGateway;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,11 +28,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class TransactionMergeServiceTest {
+class TransactionServiceTest {
 
+    @Mock private PlaidGateway plaidGateway;
     @Mock private TransactionCsvRepository repository;
 
     private final TransactionConverter converter = new TransactionConverter();
+    private final TransactionServiceHelper helper = new TransactionServiceHelper();
 
     @Test
     void mergeIntoLocalStoreAddsNewTransactionsAndPreservesExistingLocalEdits() {
@@ -61,10 +69,8 @@ class TransactionMergeServiceTest {
                         "GENERAL_MERCHANDISE");
         when(repository.findAll()).thenReturn(List.of(converter.toCsv(existing)));
 
-        TransactionMergeService service =
-                new TransactionMergeService(repository, converter, new CategoryMappingService());
         TransactionMergeResult result =
-                service.mergeIntoLocalStore(List.of(fetchedUpdated, fetchedNew));
+                newService().mergeIntoLocalStore(List.of(fetchedUpdated, fetchedNew));
 
         assertThat(result.added()).isEqualTo(1);
         assertThat(result.updated()).isEqualTo(1);
@@ -108,9 +114,7 @@ class TransactionMergeServiceTest {
                         "FOOD_AND_DRINK");
         when(repository.findAll()).thenReturn(List.of(converter.toCsv(existing)));
 
-        TransactionMergeService service =
-                new TransactionMergeService(repository, converter, new CategoryMappingService());
-        service.mergeIntoLocalStore(List.of(fetchedUpdated, fetchedNew));
+        newService().mergeIntoLocalStore(List.of(fetchedUpdated, fetchedNew));
 
         ArgumentCaptor<List<TransactionCsvRecord>> captor = ArgumentCaptor.forClass(List.class);
         verify(repository).writeAll(captor.capture());
@@ -126,6 +130,114 @@ class TransactionMergeServiceTest {
                 .singleElement()
                 .extracting(TransactionDO::localCategoryId)
                 .isEqualTo("dining-drinks");
+    }
+
+    @Test
+    void findFiltersByMonthAccountAndCustomCategoryDisplayNameThenSortsNewestFirst() {
+        TransactionDO groceries =
+                TestFixtures.transaction(
+                                "groceries",
+                                LocalDate.parse("2026-06-02"),
+                                new BigDecimal("20.00"),
+                                "GENERAL_MERCHANDISE")
+                        .withLocalCategoryId("groceries");
+        TransactionDO olderGroceries =
+                TestFixtures.transaction(
+                                "older",
+                                LocalDate.parse("2026-06-01"),
+                                new BigDecimal("10.00"),
+                                "GENERAL_MERCHANDISE")
+                        .withLocalCategoryId("groceries");
+        TransactionDO dining =
+                TestFixtures.transaction(
+                                "dining",
+                                LocalDate.parse("2026-06-03"),
+                                new BigDecimal("30.00"),
+                                "FOOD_AND_DRINK")
+                        .withLocalCategoryId("dining-drinks");
+        TransactionDO otherMonth =
+                TestFixtures.transaction(
+                                "old-month",
+                                LocalDate.parse("2026-05-01"),
+                                new BigDecimal("40.00"),
+                                "GENERAL_MERCHANDISE")
+                        .withLocalCategoryId("groceries");
+        when(repository.findAll())
+                .thenReturn(
+                        List.of(dining, otherMonth, groceries, olderGroceries).stream()
+                                .map(converter::toCsv)
+                                .toList());
+
+        List<TransactionView> result =
+                newService()
+                        .find(
+                                new TransactionQueryCommand(
+                                        YearMonth.parse("2026-06"),
+                                        null,
+                                        null,
+                                        "acc-checking",
+                                        "Groceries"),
+                                Map.of("groceries", "Groceries", "dining-drinks", "Dining"));
+
+        assertThat(result)
+                .extracting(view -> view.transaction().transactionId())
+                .containsExactly("groceries", "older");
+        assertThat(result).extracting(TransactionView::categoryDisplayName)
+                .containsExactly("Groceries", "Groceries");
+    }
+
+    @Test
+    void findUsesExplicitDateRangeAndAllowsBlankFilters() {
+        TransactionDO included =
+                TestFixtures.transaction(
+                        "included",
+                        LocalDate.parse("2026-06-15"),
+                        new BigDecimal("20.00"),
+                        "GENERAL_MERCHANDISE");
+        TransactionDO before =
+                TestFixtures.transaction(
+                        "before",
+                        LocalDate.parse("2026-06-01"),
+                        new BigDecimal("20.00"),
+                        "GENERAL_MERCHANDISE");
+        when(repository.findAll())
+                .thenReturn(List.of(before, included).stream().map(converter::toCsv).toList());
+
+        List<TransactionView> result =
+                newService()
+                        .find(
+                                new TransactionQueryCommand(
+                                        null,
+                                        LocalDate.parse("2026-06-10"),
+                                        LocalDate.parse("2026-06-20"),
+                                        "",
+                                        ""),
+                                Map.of());
+
+        assertThat(result)
+                .extracting(view -> view.transaction().transactionId())
+                .containsExactly("included");
+    }
+
+    @Test
+    void applyRulesMarksPlaidTransfersAsExcluded() {
+        TransactionDO transfer =
+                TestFixtures.transaction(
+                        "transfer",
+                        LocalDate.parse("2026-06-01"),
+                        new BigDecimal("100.00"),
+                        "TRANSFER");
+        TransactionDO food =
+                TestFixtures.transaction(
+                        "food",
+                        LocalDate.parse("2026-06-02"),
+                        new BigDecimal("25.00"),
+                        "FOOD_AND_DRINK");
+
+        List<TransactionDO> normalized = newService().applyRules(List.of(transfer, food));
+
+        assertThat(normalized.get(0).excluded()).isTrue();
+        assertThat(normalized.get(1).excluded()).isFalse();
     }
 
     @Test
@@ -149,9 +261,7 @@ class TransactionMergeServiceTest {
                         "in store");
         when(repository.findAll()).thenReturn(List.of(converter.toCsv(existing)));
 
-        TransactionDO updated =
-                new TransactionMergeService(repository, converter, new CategoryMappingService())
-                        .updateLocalCategory("txn-1", "groceries");
+        TransactionDO updated = newService().updateLocalCategory("txn-1", "groceries");
 
         assertThat(updated.localCategoryId()).isEqualTo("groceries");
         assertThat(updated.localCategory()).isNull();
@@ -170,12 +280,12 @@ class TransactionMergeServiceTest {
     void updateLocalCategoryThrowsWhenTransactionDoesNotExist() {
         when(repository.findAll()).thenReturn(List.of());
 
-        assertThatThrownBy(
-                        () ->
-                                new TransactionMergeService(
-                                                repository, converter, new CategoryMappingService())
-                                        .updateLocalCategory("missing", "groceries"))
+        assertThatThrownBy(() -> newService().updateLocalCategory("missing", "groceries"))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining("Transaction not found: missing");
+    }
+
+    private TransactionService newService() {
+        return new TransactionService(plaidGateway, repository, converter, helper);
     }
 }

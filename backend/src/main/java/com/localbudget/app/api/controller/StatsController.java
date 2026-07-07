@@ -2,10 +2,10 @@ package com.localbudget.app.api.controller;
 
 import com.localbudget.app.api.model.response.CategoryStatsResponse;
 import com.localbudget.app.api.model.response.MonthlyStatsResponse;
-import com.localbudget.app.domain.handler.GetCategoryStatsHandler;
-import com.localbudget.app.domain.handler.GetMonthlyStatsHandler;
 import com.localbudget.app.domain.model.CategoryStats;
 import com.localbudget.app.domain.model.MonthlyStats;
+import com.localbudget.app.domain.processor.GetCategoryStatsProcessor;
+import com.localbudget.app.domain.processor.GetMonthlyStatsProcessor;
 import java.time.YearMonth;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,20 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/stats")
 public class StatsController {
 
-    private final GetMonthlyStatsHandler getMonthlyStatsHandler;
-    private final GetCategoryStatsHandler getCategoryStatsHandler;
+    private final GetMonthlyStatsProcessor getMonthlyStatsProcessor;
+    private final GetCategoryStatsProcessor getCategoryStatsProcessor;
 
     public StatsController(
-            GetMonthlyStatsHandler getMonthlyStatsHandler,
-            GetCategoryStatsHandler getCategoryStatsHandler) {
-        this.getMonthlyStatsHandler = getMonthlyStatsHandler;
-        this.getCategoryStatsHandler = getCategoryStatsHandler;
+            GetMonthlyStatsProcessor getMonthlyStatsProcessor,
+            GetCategoryStatsProcessor getCategoryStatsProcessor) {
+        this.getMonthlyStatsProcessor = getMonthlyStatsProcessor;
+        this.getCategoryStatsProcessor = getCategoryStatsProcessor;
     }
 
     @GetMapping("/monthly")
     public MonthlyStatsResponse getMonthlyStats(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
-        MonthlyStats stats = getMonthlyStatsHandler.handle(month);
+        MonthlyStats stats = getMonthlyStatsProcessor.handle(month);
         return new MonthlyStatsResponse(
                 stats.month().toString(),
                 stats.income(),
@@ -43,7 +43,7 @@ public class StatsController {
     @GetMapping("/categories")
     public List<CategoryStatsResponse> getCategoryStats(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
-        return getCategoryStatsHandler.handle(month).stream().map(this::toResponse).toList();
+        return getCategoryStatsProcessor.handle(month).stream().map(this::toResponse).toList();
     }
 
     private CategoryStatsResponse toResponse(CategoryStats stats) {

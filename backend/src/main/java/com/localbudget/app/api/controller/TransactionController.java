@@ -3,12 +3,11 @@ package com.localbudget.app.api.controller;
 import com.localbudget.app.api.model.request.AssignTransactionCategoryRequest;
 import com.localbudget.app.api.model.response.TransactionResponse;
 import com.localbudget.app.converter.TransactionConverter;
-import com.localbudget.app.domain.handler.AssignTransactionCategoryHandler;
-import com.localbudget.app.domain.handler.GetTransactionsHandler;
-import com.localbudget.app.domain.model.TransactionDO;
+import com.localbudget.app.domain.model.TransactionView;
 import com.localbudget.app.domain.model.command.AssignTransactionCategoryCommand;
 import com.localbudget.app.domain.model.command.TransactionQueryCommand;
-import com.localbudget.app.domain.service.CategoryService;
+import com.localbudget.app.domain.processor.AssignTransactionCategoryProcessor;
+import com.localbudget.app.domain.processor.GetTransactionsProcessor;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -26,20 +25,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/transactions")
 public class TransactionController {
 
-    private final GetTransactionsHandler getTransactionsHandler;
-    private final AssignTransactionCategoryHandler assignTransactionCategoryHandler;
+    private final GetTransactionsProcessor getTransactionsProcessor;
+    private final AssignTransactionCategoryProcessor assignTransactionCategoryProcessor;
     private final TransactionConverter transactionConverter;
-    private final CategoryService categoryService;
 
     public TransactionController(
-            GetTransactionsHandler getTransactionsHandler,
-            AssignTransactionCategoryHandler assignTransactionCategoryHandler,
-            TransactionConverter transactionConverter,
-            CategoryService categoryService) {
-        this.getTransactionsHandler = getTransactionsHandler;
-        this.assignTransactionCategoryHandler = assignTransactionCategoryHandler;
+            GetTransactionsProcessor getTransactionsProcessor,
+            AssignTransactionCategoryProcessor assignTransactionCategoryProcessor,
+            TransactionConverter transactionConverter) {
+        this.getTransactionsProcessor = getTransactionsProcessor;
+        this.assignTransactionCategoryProcessor = assignTransactionCategoryProcessor;
         this.transactionConverter = transactionConverter;
-        this.categoryService = categoryService;
     }
 
     @GetMapping
@@ -53,25 +49,21 @@ public class TransactionController {
             @RequestParam(required = false) String category) {
         TransactionQueryCommand command =
                 new TransactionQueryCommand(month, startDate, endDate, accountId, category);
-        return getTransactionsHandler.handle(command).stream().map(this::toResponse).toList();
+        return getTransactionsProcessor.handle(command).stream().map(this::toResponse).toList();
     }
 
     @PatchMapping("/{transactionId}/category")
     public TransactionResponse assignCategory(
             @PathVariable String transactionId,
             @Valid @RequestBody AssignTransactionCategoryRequest request) {
-        TransactionDO transaction =
-                assignTransactionCategoryHandler.handle(
+        TransactionView transaction =
+                assignTransactionCategoryProcessor.handle(
                         new AssignTransactionCategoryCommand(transactionId, request.categoryId()));
         return toResponse(transaction);
     }
 
-    private TransactionResponse toResponse(TransactionDO transaction) {
+    private TransactionResponse toResponse(TransactionView transaction) {
         return transactionConverter.toResponse(
-                transaction,
-                categoryService.displayCategoryForTransaction(
-                        transaction.localCategoryId(),
-                        transaction.localCategory(),
-                        transaction.primaryCategory()));
+                transaction.transaction(), transaction.categoryDisplayName());
     }
 }

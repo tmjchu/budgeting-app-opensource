@@ -2,6 +2,7 @@ package com.localbudget.app.domain.service;
 
 import com.localbudget.app.converter.AccountConverter;
 import com.localbudget.app.converter.PlaidItemConverter;
+import com.localbudget.app.data.repository.AccountCsvRepository;
 import com.localbudget.app.data.repository.PlaidItemCsvRepository;
 import com.localbudget.app.domain.model.AccountDO;
 import com.localbudget.app.domain.model.PlaidItem;
@@ -23,7 +24,7 @@ public class PlaidConnectionService {
 
     private final PlaidGateway plaidGateway;
     private final PlaidItemCsvRepository plaidItemRepository;
-    private final AccountService accountService;
+    private final AccountCsvRepository accountRepository;
     private final PlaidItemConverter plaidItemConverter;
     private final AccountConverter accountConverter;
     private final Clock clock;
@@ -32,13 +33,13 @@ public class PlaidConnectionService {
     public PlaidConnectionService(
             PlaidGateway plaidGateway,
             PlaidItemCsvRepository plaidItemRepository,
-            AccountService accountService,
+            AccountCsvRepository accountRepository,
             PlaidItemConverter plaidItemConverter,
             AccountConverter accountConverter,
             Clock clock) {
         this.plaidGateway = plaidGateway;
         this.plaidItemRepository = plaidItemRepository;
-        this.accountService = accountService;
+        this.accountRepository = accountRepository;
         this.plaidItemConverter = plaidItemConverter;
         this.accountConverter = accountConverter;
         this.clock = clock;
@@ -75,7 +76,7 @@ public class PlaidConnectionService {
                         .toList();
 
         plaidItemRepository.upsert(plaidItemConverter.toCsv(plaidItem));
-        accountService.saveAll(accounts);
+        accountRepository.upsertAll(accounts.stream().map(accountConverter::toCsv).toList());
         return new ExchangePlaidPublicTokenResult(plaidItem, accounts);
     }
 

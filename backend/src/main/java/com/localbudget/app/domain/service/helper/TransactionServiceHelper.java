@@ -1,11 +1,58 @@
-package com.localbudget.app.domain.service;
+package com.localbudget.app.domain.service.helper;
 
 import com.localbudget.app.domain.model.TransactionDO;
 import java.util.Locale;
-import org.springframework.stereotype.Service;
+import java.util.Map;
+import org.springframework.stereotype.Component;
 
-@Service
-public class CategoryMappingService {
+@Component
+public class TransactionServiceHelper {
+
+    private static final String UNCATEGORIZED_ID = "uncategorized";
+
+    public TransactionDO markTransfersExcluded(TransactionDO transaction) {
+        String category = transaction.primaryCategory();
+        boolean isTransfer = category != null && category.equalsIgnoreCase("TRANSFER");
+        if (!isTransfer) {
+            return transaction;
+        }
+        return transaction.withExcluded(true);
+    }
+
+    public TransactionDO preserveLocalEdits(TransactionDO fetched, TransactionDO existing) {
+        if (existing == null) {
+            return fetched;
+        }
+        return new TransactionDO(
+                fetched.transactionId(),
+                fetched.plaidItemId(),
+                fetched.accountId(),
+                fetched.accountName(),
+                fetched.date(),
+                fetched.name(),
+                fetched.merchantName(),
+                fetched.amount(),
+                fetched.primaryCategory(),
+                fetched.detailedCategory(),
+                existing.localCategory(),
+                existing.localCategoryId(),
+                fetched.pending(),
+                existing.excluded(),
+                fetched.paymentChannel());
+    }
+
+    public String displayCategory(TransactionDO transaction, Map<String, String> displayNamesById) {
+        if (transaction.localCategoryId() != null && !transaction.localCategoryId().isBlank()) {
+            return displayNamesById.getOrDefault(transaction.localCategoryId(), "Uncategorized");
+        }
+        if (transaction.localCategory() != null && !transaction.localCategory().isBlank()) {
+            return transaction.localCategory();
+        }
+        if (transaction.primaryCategory() != null && !transaction.primaryCategory().isBlank()) {
+            return transaction.primaryCategory();
+        }
+        return displayNamesById.getOrDefault(UNCATEGORIZED_ID, "Uncategorized");
+    }
 
     public String defaultCategoryId(TransactionDO transaction) {
         String primary = normalize(transaction.primaryCategory());
@@ -104,7 +151,7 @@ public class CategoryMappingService {
         if (contains(combined, "GENERAL_MERCHANDISE", "SHOPPING")) {
             return "shopping";
         }
-        return "uncategorized";
+        return UNCATEGORIZED_ID;
     }
 
     private static String normalize(String value) {

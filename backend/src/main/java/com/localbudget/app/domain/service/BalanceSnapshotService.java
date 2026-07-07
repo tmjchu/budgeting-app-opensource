@@ -10,25 +10,23 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BalanceSnapshotService {
 
     private final PlaidGateway plaidGateway;
-    private final AccountService accountService;
     private final BalanceSnapshotCsvRepository balanceSnapshotRepository;
     private final BalanceSnapshotConverter balanceSnapshotConverter;
     private final Clock clock;
 
     public BalanceSnapshotService(
             PlaidGateway plaidGateway,
-            AccountService accountService,
             BalanceSnapshotCsvRepository balanceSnapshotRepository,
             BalanceSnapshotConverter balanceSnapshotConverter,
             Clock clock) {
         this.plaidGateway = plaidGateway;
-        this.accountService = accountService;
         this.balanceSnapshotRepository = balanceSnapshotRepository;
         this.balanceSnapshotConverter = balanceSnapshotConverter;
         this.clock = clock;
@@ -40,12 +38,13 @@ public class BalanceSnapshotService {
                 .toList();
     }
 
-    public List<BalanceSnapshot> captureCurrentBalances(List<PlaidItem> plaidItems) {
+    public List<BalanceSnapshot> captureCurrentBalances(
+            List<PlaidItem> plaidItems, Map<String, List<AccountDO>> trackedAccountsByPlaidItemId) {
         Instant syncedAt = Instant.now(clock);
         List<BalanceSnapshot> snapshots = new ArrayList<>();
         for (PlaidItem plaidItem : plaidItems) {
             List<AccountDO> trackedAccounts =
-                    accountService.findTrackedByPlaidItemId(plaidItem.plaidItemId());
+                    trackedAccountsByPlaidItemId.getOrDefault(plaidItem.plaidItemId(), List.of());
             plaidGateway.fetchBalances(plaidItem, trackedAccounts).stream()
                     .map(
                             accountBase ->

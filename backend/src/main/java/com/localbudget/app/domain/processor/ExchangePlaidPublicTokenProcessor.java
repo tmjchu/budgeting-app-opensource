@@ -1,4 +1,4 @@
-package com.localbudget.app.domain.handler;
+package com.localbudget.app.domain.processor;
 
 import com.localbudget.app.domain.model.command.ExchangePlaidPublicTokenCommand;
 import com.localbudget.app.domain.model.result.ExchangePlaidPublicTokenResult;
@@ -6,11 +6,11 @@ import com.localbudget.app.domain.service.PlaidConnectionService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExchangePlaidPublicTokenHandler {
+public class ExchangePlaidPublicTokenProcessor {
 
     private final PlaidConnectionService plaidConnectionService;
 
-    public ExchangePlaidPublicTokenHandler(PlaidConnectionService plaidConnectionService) {
+    public ExchangePlaidPublicTokenProcessor(PlaidConnectionService plaidConnectionService) {
         this.plaidConnectionService = plaidConnectionService;
     }
 

@@ -19,6 +19,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,14 +30,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class BalanceSnapshotServiceTest {
 
     @Mock private PlaidGateway plaidGateway;
-    @Mock private AccountService accountService;
     @Mock private BalanceSnapshotCsvRepository repository;
 
     @Test
     void captureCurrentBalancesFetchesOnlyTrackedAccountsAndAppendsSnapshotRows() {
         AccountDO account = TestFixtures.checkingAccount();
         Instant syncedAt = Instant.parse("2026-06-01T12:00:00Z");
-        when(accountService.findTrackedByPlaidItemId("item-1")).thenReturn(List.of(account));
         when(plaidGateway.fetchBalances(TestFixtures.plaidItem(), List.of(account)))
                 .thenReturn(
                         List.of(
@@ -56,13 +55,13 @@ class BalanceSnapshotServiceTest {
         BalanceSnapshotService service =
                 new BalanceSnapshotService(
                         plaidGateway,
-                        accountService,
                         repository,
                         new BalanceSnapshotConverter(),
                         clock);
 
         List<BalanceSnapshot> snapshots =
-                service.captureCurrentBalances(List.of(TestFixtures.plaidItem()));
+                service.captureCurrentBalances(
+                        List.of(TestFixtures.plaidItem()), Map.of("item-1", List.of(account)));
 
         assertThat(snapshots).hasSize(1);
         assertThat(snapshots.get(0).snapshotId()).isEqualTo("2026-06-01T12:00:00Z_acc-checking");
