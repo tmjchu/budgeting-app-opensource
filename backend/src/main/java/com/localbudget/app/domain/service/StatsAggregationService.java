@@ -3,6 +3,7 @@ package com.localbudget.app.domain.service;
 import com.localbudget.app.domain.model.CategoryStats;
 import com.localbudget.app.domain.model.MonthlyStats;
 import com.localbudget.app.domain.model.TransactionDO;
+import com.localbudget.app.domain.service.helper.TransactionServiceHelper;
 import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.Comparator;
@@ -14,10 +15,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class StatsAggregationService {
 
-    private final CategoryService categoryService;
+    private final TransactionServiceHelper transactionServiceHelper;
 
-    public StatsAggregationService(CategoryService categoryService) {
-        this.categoryService = categoryService;
+    public StatsAggregationService(TransactionServiceHelper transactionServiceHelper) {
+        this.transactionServiceHelper = transactionServiceHelper;
     }
 
     public MonthlyStats buildMonthlyStats(YearMonth month, List<TransactionDO> transactions) {
@@ -42,8 +43,9 @@ public class StatsAggregationService {
     }
 
     public List<CategoryStats> buildCategoryStats(
-            YearMonth month, List<TransactionDO> transactions) {
-        Map<String, String> displayNamesById = categoryService.displayNamesById();
+            YearMonth month,
+            List<TransactionDO> transactions,
+            Map<String, String> displayNamesById) {
         Map<String, List<TransactionDO>> byCategory =
                 transactions.stream()
                         .filter(transaction -> !transaction.excluded())
@@ -69,15 +71,6 @@ public class StatsAggregationService {
 
     private String displayCategory(
             TransactionDO transaction, Map<String, String> displayNamesById) {
-        if (transaction.localCategoryId() != null && !transaction.localCategoryId().isBlank()) {
-            return displayNamesById.getOrDefault(transaction.localCategoryId(), "Uncategorized");
-        }
-        if (transaction.localCategory() != null && !transaction.localCategory().isBlank()) {
-            return transaction.localCategory();
-        }
-        if (transaction.primaryCategory() != null && !transaction.primaryCategory().isBlank()) {
-            return transaction.primaryCategory();
-        }
-        return displayNamesById.getOrDefault("uncategorized", "Uncategorized");
+        return transactionServiceHelper.displayCategory(transaction, displayNamesById);
     }
 }

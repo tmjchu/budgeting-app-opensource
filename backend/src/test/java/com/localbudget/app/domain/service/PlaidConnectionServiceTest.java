@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 
 import com.localbudget.app.converter.AccountConverter;
 import com.localbudget.app.converter.PlaidItemConverter;
+import com.localbudget.app.data.model.AccountCsvRecord;
 import com.localbudget.app.data.model.PlaidItemCsvRecord;
+import com.localbudget.app.data.repository.AccountCsvRepository;
 import com.localbudget.app.data.repository.PlaidItemCsvRepository;
 import com.localbudget.app.domain.model.command.ExchangePlaidPublicTokenCommand;
 import com.localbudget.app.domain.model.command.SelectedAccountCommand;
@@ -32,7 +34,7 @@ class PlaidConnectionServiceTest {
 
     @Mock private PlaidGateway plaidGateway;
     @Mock private PlaidItemCsvRepository plaidItemRepository;
-    @Mock private AccountService accountService;
+    @Mock private AccountCsvRepository accountRepository;
 
     @Test
     void createLinkTokenUsesCachedTokenBeforeTtlExpires() {
@@ -94,14 +96,22 @@ class PlaidConnectionServiceTest {
                 ArgumentCaptor.forClass(PlaidItemCsvRecord.class);
         verify(plaidItemRepository).upsert(itemCaptor.capture());
         assertThat(itemCaptor.getValue().createdAt()).isEqualTo("2026-01-01T00:00:00Z");
-        verify(accountService).saveAll(result.trackedAccounts());
+        ArgumentCaptor<List<AccountCsvRecord>> accountCaptor = ArgumentCaptor.forClass(List.class);
+        verify(accountRepository).upsertAll(accountCaptor.capture());
+        assertThat(accountCaptor.getValue())
+                .singleElement()
+                .satisfies(
+                        account -> {
+                            assertThat(account.accountId()).isEqualTo("acc-1");
+                            assertThat(account.plaidItemId()).isEqualTo("item-1");
+                        });
     }
 
     private PlaidConnectionService newService(Clock clock) {
         return new PlaidConnectionService(
                 plaidGateway,
                 plaidItemRepository,
-                accountService,
+                accountRepository,
                 new PlaidItemConverter(),
                 new AccountConverter(),
                 clock);

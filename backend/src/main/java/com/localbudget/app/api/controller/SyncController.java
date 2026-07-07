@@ -2,7 +2,7 @@ package com.localbudget.app.api.controller;
 
 import com.localbudget.app.api.model.response.SyncResponse;
 import com.localbudget.app.converter.SyncRunConverter;
-import com.localbudget.app.domain.handler.SyncBankDataHandler;
+import com.localbudget.app.domain.processor.SyncBankDataProcessor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/sync")
 public class SyncController {
 
-    private final SyncBankDataHandler syncBankDataHandler;
+    private final SyncBankDataProcessor syncBankDataProcessor;
     private final SyncRunConverter syncRunConverter;
 
     public SyncController(
-            SyncBankDataHandler syncBankDataHandler, SyncRunConverter syncRunConverter) {
-        this.syncBankDataHandler = syncBankDataHandler;
+            SyncBankDataProcessor syncBankDataProcessor, SyncRunConverter syncRunConverter) {
+        this.syncBankDataProcessor = syncBankDataProcessor;
         this.syncRunConverter = syncRunConverter;
     }
 
     @PostMapping
     public SyncResponse sync() {
-        return syncRunConverter.toResponse(syncBankDataHandler.handle());
+        return syncRunConverter.toResponse(syncBankDataProcessor.handle());
     }
 }

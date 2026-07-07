@@ -1,4 +1,4 @@
-package com.localbudget.app.domain.handler;
+package com.localbudget.app.domain.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.localbudget.app.TestFixtures;
+import com.localbudget.app.domain.model.AccountDO;
 import com.localbudget.app.domain.model.BalanceSnapshot;
 import com.localbudget.app.domain.model.PlaidItem;
 import com.localbudget.app.domain.model.SyncRun;
@@ -13,31 +14,30 @@ import com.localbudget.app.domain.model.SyncStatus;
 import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.result.SyncResult;
 import com.localbudget.app.domain.model.result.TransactionMergeResult;
+import com.localbudget.app.domain.service.AccountService;
 import com.localbudget.app.domain.service.BalanceSnapshotService;
 import com.localbudget.app.domain.service.PlaidConnectionService;
 import com.localbudget.app.domain.service.SyncRunService;
-import com.localbudget.app.domain.service.TransactionFetchService;
-import com.localbudget.app.domain.service.TransactionMergeService;
-import com.localbudget.app.domain.service.TransactionRuleService;
+import com.localbudget.app.domain.service.TransactionService;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class SyncBankDataHandlerTest {
+class SyncBankDataProcessorTest {
 
     @Mock private SyncRunService syncRunService;
     @Mock private PlaidConnectionService plaidConnectionService;
-    @Mock private TransactionFetchService transactionFetchService;
-    @Mock private TransactionRuleService transactionRuleService;
-    @Mock private TransactionMergeService transactionMergeService;
+    @Mock private AccountService accountService;
+    @Mock private TransactionService transactionService;
     @Mock private BalanceSnapshotService balanceSnapshotService;
 
     private final Clock clock = Clock.fixed(Instant.parse("2026-06-28T00:00:00Z"), ZoneOffset.UTC);
@@ -72,6 +72,9 @@ class SyncBankDataHandlerTest {
                         new BigDecimal("10.00"),
                         "FOOD_AND_DRINK");
         TransactionMergeResult mergeResult = new TransactionMergeResult(1, 0, 0);
+        AccountDO account = TestFixtures.checkingAccount();
+        Map<String, List<AccountDO>> trackedAccountsByPlaidItemId =
+                Map.of("item-1", List.of(account));
         BalanceSnapshot snapshot =
                 new BalanceSnapshot(
                         "snap-1",
@@ -89,14 +92,17 @@ class SyncBankDataHandlerTest {
 
         when(syncRunService.start()).thenReturn(started);
         when(plaidConnectionService.findConnectedItems()).thenReturn(List.of(plaidItem));
-        when(transactionFetchService.fetchTransactions(
+        when(accountService.findTrackedByPlaidItemId("item-1")).thenReturn(List.of(account));
+        when(transactionService.fetchTransactions(
                         List.of(plaidItem),
+                        trackedAccountsByPlaidItemId,
                         LocalDate.parse("2025-06-28"),
                         LocalDate.parse("2026-06-28")))
                 .thenReturn(List.of(fetched));
-        when(transactionRuleService.applyRules(List.of(fetched))).thenReturn(List.of(fetched));
-        when(transactionMergeService.mergeIntoLocalStore(List.of(fetched))).thenReturn(mergeResult);
-        when(balanceSnapshotService.captureCurrentBalances(List.of(plaidItem)))
+        when(transactionService.applyRules(List.of(fetched))).thenReturn(List.of(fetched));
+        when(transactionService.mergeIntoLocalStore(List.of(fetched))).thenReturn(mergeResult);
+        when(balanceSnapshotService.captureCurrentBalances(
+                        List.of(plaidItem), trackedAccountsByPlaidItemId))
                 .thenReturn(List.of(snapshot));
         when(syncRunService.markSuccess(started, mergeResult, 1)).thenReturn(completed);
 
@@ -127,13 +133,12 @@ class SyncBankDataHandlerTest {
         verify(syncRunService).markFailed(started, failure);
     }
 
-    private SyncBankDataHandler handler() {
-        return new SyncBankDataHandler(
+    private SyncBankDataProcessor handler() {
+        return new SyncBankDataProcessor(
                 syncRunService,
                 plaidConnectionService,
-                transactionFetchService,
-                transactionRuleService,
-                transactionMergeService,
+                accountService,
+                transactionService,
                 balanceSnapshotService,
                 clock);
     }

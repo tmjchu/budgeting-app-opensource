@@ -1,16 +1,19 @@
-package com.localbudget.app.domain.handler;
+package com.localbudget.app.domain.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.localbudget.app.TestFixtures;
 import com.localbudget.app.converter.CategoryConverter;
 import com.localbudget.app.data.repository.CategoryCsvRepository;
 import com.localbudget.app.domain.model.TransactionDO;
+import com.localbudget.app.domain.model.TransactionView;
 import com.localbudget.app.domain.model.command.AssignTransactionCategoryCommand;
 import com.localbudget.app.domain.service.CategoryService;
-import com.localbudget.app.domain.service.TransactionMergeService;
+import com.localbudget.app.domain.service.TransactionService;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -22,11 +25,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
-class AssignTransactionCategoryHandlerTest {
+class AssignTransactionCategoryProcessorTest {
 
     @TempDir Path dataDirectory;
 
-    @Mock private TransactionMergeService transactionMergeService;
+    @Mock private TransactionService transactionService;
 
     @Test
     void handleAssignsKnownActiveCategory() {
@@ -37,25 +40,29 @@ class AssignTransactionCategoryHandlerTest {
                                 new BigDecimal("12.00"),
                                 "FOOD_AND_DRINK")
                         .withLocalCategoryId("groceries");
-        when(transactionMergeService.updateLocalCategory("txn-1", "groceries"))
+        when(transactionService.updateLocalCategory("txn-1", "groceries"))
                 .thenReturn(assigned);
-        AssignTransactionCategoryHandler handler =
-                new AssignTransactionCategoryHandler(newCategoryService(), transactionMergeService);
+        when(transactionService.toView(eq(assigned), anyMap()))
+                .thenReturn(new TransactionView(assigned, "Groceries"));
+        CategoryService categoryService = newCategoryService();
+        AssignTransactionCategoryProcessor processor =
+                new AssignTransactionCategoryProcessor(categoryService, transactionService);
 
-        TransactionDO result =
-                handler.handle(new AssignTransactionCategoryCommand("txn-1", "groceries"));
+        TransactionView result =
+                processor.handle(new AssignTransactionCategoryCommand("txn-1", "groceries"));
 
-        assertThat(result.localCategoryId()).isEqualTo("groceries");
+        assertThat(result.transaction().localCategoryId()).isEqualTo("groceries");
+        assertThat(result.categoryDisplayName()).isEqualTo("Groceries");
     }
 
     @Test
     void handleRejectsUnknownCategory() {
-        AssignTransactionCategoryHandler handler =
-                new AssignTransactionCategoryHandler(newCategoryService(), transactionMergeService);
+        AssignTransactionCategoryProcessor processor =
+                new AssignTransactionCategoryProcessor(newCategoryService(), transactionService);
 
         assertThatThrownBy(
                         () ->
-                                handler.handle(
+                                processor.handle(
                                         new AssignTransactionCategoryCommand("txn-1", "not-real")))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Unknown category id");

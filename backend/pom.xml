@@ -20,6 +20,7 @@
     <properties>
         <java.version>21</java.version>
         <google-java-format.version>1.35.0</google-java-format.version>
+        <lombok.version>1.18.46</lombok.version>
         <spotless-maven-plugin.version>3.7.0</spotless-maven-plugin.version>
     </properties>
 
@@ -46,6 +47,12 @@
             <groupId>com.plaid</groupId>
             <artifactId>plaid-java</artifactId>
             <version>41.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

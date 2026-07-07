@@ -2,7 +2,7 @@ package com.localbudget.app.api.controller;
 
 import com.localbudget.app.api.model.response.CategoryResponse;
 import com.localbudget.app.domain.model.CategoryDO;
-import com.localbudget.app.domain.service.CategoryService;
+import com.localbudget.app.domain.processor.GetCategoriesProcessor;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,15 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/categories")
 public class CategoryController {
 
-    private final CategoryService categoryService;
+    private final GetCategoriesProcessor getCategoriesProcessor;
 
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
+    public CategoryController(GetCategoriesProcessor getCategoriesProcessor) {
+        this.getCategoriesProcessor = getCategoriesProcessor;
     }
 
     @GetMapping
     public List<CategoryResponse> getCategories() {
-        return categoryService.findAll().stream().map(this::toResponse).toList();
+        return getCategoriesProcessor.handle().stream().map(this::toResponse).toList();
     }
 
     private CategoryResponse toResponse(CategoryDO category) {

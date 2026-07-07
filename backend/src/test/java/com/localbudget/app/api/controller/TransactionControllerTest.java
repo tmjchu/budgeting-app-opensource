@@ -7,12 +7,12 @@ import com.localbudget.app.TestFixtures;
 import com.localbudget.app.api.model.request.AssignTransactionCategoryRequest;
 import com.localbudget.app.api.model.response.TransactionResponse;
 import com.localbudget.app.converter.TransactionConverter;
-import com.localbudget.app.domain.handler.AssignTransactionCategoryHandler;
-import com.localbudget.app.domain.handler.GetTransactionsHandler;
 import com.localbudget.app.domain.model.TransactionDO;
+import com.localbudget.app.domain.model.TransactionView;
 import com.localbudget.app.domain.model.command.AssignTransactionCategoryCommand;
 import com.localbudget.app.domain.model.command.TransactionQueryCommand;
-import com.localbudget.app.domain.service.CategoryService;
+import com.localbudget.app.domain.processor.AssignTransactionCategoryProcessor;
+import com.localbudget.app.domain.processor.GetTransactionsProcessor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -25,9 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class TransactionControllerTest {
 
-    @Mock private GetTransactionsHandler getTransactionsHandler;
-    @Mock private AssignTransactionCategoryHandler assignTransactionCategoryHandler;
-    @Mock private CategoryService categoryService;
+    @Mock private GetTransactionsProcessor getTransactionsProcessor;
+    @Mock private AssignTransactionCategoryProcessor assignTransactionCategoryProcessor;
 
     private final TransactionConverter transactionConverter = new TransactionConverter();
 
@@ -40,12 +39,10 @@ class TransactionControllerTest {
                                 new BigDecimal("12.00"),
                                 "FOOD_AND_DRINK")
                         .withLocalCategoryId("groceries");
-        when(getTransactionsHandler.handle(
+        when(getTransactionsProcessor.handle(
                         new TransactionQueryCommand(
                                 YearMonth.parse("2026-06"), null, null, null, null)))
-                .thenReturn(List.of(transaction));
-        when(categoryService.displayCategoryForTransaction("groceries", null, "FOOD_AND_DRINK"))
-                .thenReturn("Groceries");
+                .thenReturn(List.of(new TransactionView(transaction, "Groceries")));
 
         List<TransactionResponse> responses =
                 newController()
@@ -72,11 +69,9 @@ class TransactionControllerTest {
                                 new BigDecimal("12.00"),
                                 "FOOD_AND_DRINK")
                         .withLocalCategoryId("shopping");
-        when(assignTransactionCategoryHandler.handle(
+        when(assignTransactionCategoryProcessor.handle(
                         new AssignTransactionCategoryCommand("txn-1", "shopping")))
-                .thenReturn(transaction);
-        when(categoryService.displayCategoryForTransaction("shopping", null, "FOOD_AND_DRINK"))
-                .thenReturn("Shopping");
+                .thenReturn(new TransactionView(transaction, "Shopping"));
 
         TransactionResponse response =
                 newController()
@@ -90,9 +85,6 @@ class TransactionControllerTest {
 
     private TransactionController newController() {
         return new TransactionController(
-                getTransactionsHandler,
-                assignTransactionCategoryHandler,
-                transactionConverter,
-                categoryService);
+                getTransactionsProcessor, assignTransactionCategoryProcessor, transactionConverter);
     }
 }

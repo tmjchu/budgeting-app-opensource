@@ -1,14 +1,14 @@
-package com.localbudget.app.domain.handler;
+package com.localbudget.app.domain.processor;
 
 import com.localbudget.app.domain.service.PlaidConnectionService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CreatePlaidLinkTokenHandler {
+public class CreatePlaidLinkTokenProcessor {
 
     private final PlaidConnectionService plaidConnectionService;
 
-    public CreatePlaidLinkTokenHandler(PlaidConnectionService plaidConnectionService) {
+    public CreatePlaidLinkTokenProcessor(PlaidConnectionService plaidConnectionService) {
         this.plaidConnectionService = plaidConnectionService;
     }
 
