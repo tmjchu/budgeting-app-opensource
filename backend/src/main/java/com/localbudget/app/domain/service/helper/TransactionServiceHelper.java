@@ -38,7 +38,9 @@ public class TransactionServiceHelper {
                 existing.localCategoryId(),
                 fetched.pending(),
                 existing.excluded(),
-                fetched.paymentChannel());
+                fetched.paymentChannel(),
+                existing.customName(),
+                existing.customDate());
     }
 
     public String displayCategory(TransactionDO transaction, Map<String, String> displayNamesById) {
@@ -77,7 +79,7 @@ public class TransactionServiceHelper {
         if (contains(combined, "TRANSFER")) {
             return "internal-transfers";
         }
-        if (contains(combined, "BANK_FEES", "FEE")) {
+        if (contains(combined, "BANK_FEES", "_FEE", "FEE_")) {
             return "fees";
         }
         if (contains(combined, "LOAN")) {
@@ -92,8 +94,7 @@ public class TransactionServiceHelper {
         if (contains(combined, "GROCERY", "GROCERIES", "SUPERMARKET")) {
             return "groceries";
         }
-        if (contains(
-                combined, "RESTAURANT", "COFFEE", "FAST_FOOD", "BAR", "FOOD_AND_DRINK")) {
+        if (contains(combined, "RESTAURANT", "COFFEE", "FAST_FOOD", "BAR", "FOOD_AND_DRINK")) {
             return "dining-drinks";
         }
         if (contains(combined, "UTILITY", "UTILITIES", "RENT_AND_UTILITIES")) {

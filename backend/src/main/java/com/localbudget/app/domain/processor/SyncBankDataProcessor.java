@@ -46,10 +46,7 @@ public class SyncBankDataProcessor {
 
             List<TransactionDO> fetchedTransactions =
                     transactionService.fetchTransactions(
-                            connectedItems,
-                            trackedAccountsByPlaidItemId,
-                            startDate,
-                            endDate);
+                            connectedItems, trackedAccountsByPlaidItemId, startDate, endDate);
             List<TransactionDO> normalizedTransactions =
                     transactionService.applyRules(fetchedTransactions);
             TransactionMergeResult mergeResult =

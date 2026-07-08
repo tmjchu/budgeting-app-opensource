@@ -32,6 +32,44 @@ public class TransactionDO {
     private boolean pending;
     private boolean excluded;
     private String paymentChannel;
+    private String customName;
+    private LocalDate customDate;
+
+    public TransactionDO(
+            String transactionId,
+            String plaidItemId,
+            String accountId,
+            String accountName,
+            LocalDate date,
+            String name,
+            String merchantName,
+            BigDecimal amount,
+            String primaryCategory,
+            String detailedCategory,
+            String localCategory,
+            String localCategoryId,
+            boolean pending,
+            boolean excluded,
+            String paymentChannel) {
+        this(
+                transactionId,
+                plaidItemId,
+                accountId,
+                accountName,
+                date,
+                name,
+                merchantName,
+                amount,
+                primaryCategory,
+                detailedCategory,
+                localCategory,
+                localCategoryId,
+                pending,
+                excluded,
+                paymentChannel,
+                null,
+                null);
+    }
 
     public String effectiveCategory() {
         if (localCategory != null && !localCategory.isBlank()) {
@@ -41,6 +79,17 @@ public class TransactionDO {
             return primaryCategory;
         }
         return "Uncategorized";
+    }
+
+    public String effectiveName() {
+        if (customName != null && !customName.isBlank()) {
+            return customName;
+        }
+        return name;
+    }
+
+    public LocalDate effectiveDate() {
+        return customDate == null ? date : customDate;
     }
 
     public TransactionDO withLocalCategoryId(String nextLocalCategoryId) {
@@ -61,6 +110,16 @@ public class TransactionDO {
 
     public TransactionDO withExcluded(boolean nextExcluded) {
         excluded = nextExcluded;
+        return this;
+    }
+
+    public TransactionDO withCustomName(String nextCustomName) {
+        customName = nextCustomName;
+        return this;
+    }
+
+    public TransactionDO withCustomDate(LocalDate nextCustomDate) {
+        customDate = nextCustomDate;
         return this;
     }
 }

@@ -58,10 +58,14 @@ public class TransactionConverter {
                 transactionCsvRecord.primaryCategory(),
                 transactionCsvRecord.detailedCategory(),
                 transactionCsvRecord.localCategory(),
-                localCategoryId(transactionCsvRecord.localCategoryId(), transactionCsvRecord.localCategory()),
+                localCategoryId(
+                        transactionCsvRecord.localCategoryId(),
+                        transactionCsvRecord.localCategory()),
                 Boolean.parseBoolean(transactionCsvRecord.pending()),
                 Boolean.parseBoolean(transactionCsvRecord.excluded()),
-                transactionCsvRecord.paymentChannel());
+                transactionCsvRecord.paymentChannel(),
+                transactionCsvRecord.customName(),
+                parseDate(transactionCsvRecord.customDate()));
     }
 
     public TransactionCsvRecord toCsv(TransactionDO transaction) {
@@ -80,7 +84,9 @@ public class TransactionConverter {
                 String.valueOf(transaction.pending()),
                 String.valueOf(transaction.excluded()),
                 transaction.paymentChannel(),
-                transaction.localCategoryId());
+                transaction.localCategoryId(),
+                transaction.customName(),
+                transaction.customDate() == null ? null : transaction.customDate().toString());
     }
 
     public TransactionResponse toResponse(TransactionDO transaction, String categoryDisplayName) {
@@ -88,8 +94,8 @@ public class TransactionConverter {
                 transaction.transactionId(),
                 transaction.accountId(),
                 transaction.accountName(),
-                transaction.date(),
-                transaction.name(),
+                transaction.effectiveDate(),
+                transaction.effectiveName(),
                 transaction.merchantName(),
                 transaction.amount(),
                 categoryDisplayName,
@@ -104,6 +110,10 @@ public class TransactionConverter {
 
     private static BigDecimal parseAmount(String value) {
         return value == null || value.isBlank() ? BigDecimal.ZERO : new BigDecimal(value);
+    }
+
+    private static LocalDate parseDate(String value) {
+        return value == null || value.isBlank() ? null : LocalDate.parse(value);
     }
 
     private static BigDecimal amount(Double value) {

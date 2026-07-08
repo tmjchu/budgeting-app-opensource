@@ -5,18 +5,23 @@ import static org.mockito.Mockito.when;
 
 import com.localbudget.app.TestFixtures;
 import com.localbudget.app.api.model.request.AssignTransactionCategoryRequest;
+import com.localbudget.app.api.model.request.UpdateTransactionsRequest;
 import com.localbudget.app.api.model.response.TransactionResponse;
 import com.localbudget.app.converter.TransactionConverter;
 import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.TransactionView;
 import com.localbudget.app.domain.model.command.AssignTransactionCategoryCommand;
 import com.localbudget.app.domain.model.command.TransactionQueryCommand;
+import com.localbudget.app.domain.model.command.UpdateTransactionsCommand;
 import com.localbudget.app.domain.processor.AssignTransactionCategoryProcessor;
 import com.localbudget.app.domain.processor.GetTransactionsProcessor;
+import com.localbudget.app.domain.processor.UpdateTransactionsProcessor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,6 +32,7 @@ class TransactionControllerTest {
 
     @Mock private GetTransactionsProcessor getTransactionsProcessor;
     @Mock private AssignTransactionCategoryProcessor assignTransactionCategoryProcessor;
+    @Mock private UpdateTransactionsProcessor updateTransactionsProcessor;
 
     private final TransactionConverter transactionConverter = new TransactionConverter();
 
@@ -45,8 +51,7 @@ class TransactionControllerTest {
                 .thenReturn(List.of(new TransactionView(transaction, "Groceries")));
 
         List<TransactionResponse> responses =
-                newController()
-                        .getTransactions(YearMonth.parse("2026-06"), null, null, null, null);
+                newController().getTransactions(YearMonth.parse("2026-06"), null, null, null, null);
 
         assertThat(responses)
                 .singleElement()
@@ -57,6 +62,46 @@ class TransactionControllerTest {
                             assertThat(response.assignedCategoryId()).isEqualTo("groceries");
                             assertThat(response.assignedCategoryName()).isEqualTo("Groceries");
                             assertThat(response.primaryCategory()).isEqualTo("FOOD_AND_DRINK");
+                        });
+    }
+
+    @Test
+    void updateTransactionsDelegatesAndReturnsUpdatedTransactions() {
+        TransactionDO transaction =
+                TestFixtures.transaction(
+                                "txn-1",
+                                LocalDate.parse("2026-06-01"),
+                                new BigDecimal("12.00"),
+                                "FOOD_AND_DRINK")
+                        .withLocalCategoryId("shopping")
+                        .withCustomName("Custom coffee")
+                        .withCustomDate(LocalDate.parse("2026-06-05"));
+        UpdateTransactionsCommand command =
+                new UpdateTransactionsCommand(
+                        Set.of("txn-1"),
+                        "Custom coffee",
+                        "shopping",
+                        LocalDate.parse("2026-06-05"));
+        when(updateTransactionsProcessor.process(command))
+                .thenReturn(List.of(new TransactionView(transaction, "Shopping")));
+
+        List<TransactionResponse> responses =
+                newController()
+                        .updateTransactions(
+                                new UpdateTransactionsRequest(
+                                        new LinkedHashSet<>(List.of("txn-1")),
+                                        "Custom coffee",
+                                        "shopping",
+                                        LocalDate.parse("2026-06-05")));
+
+        assertThat(responses)
+                .singleElement()
+                .satisfies(
+                        response -> {
+                            assertThat(response.name()).isEqualTo("Custom coffee");
+                            assertThat(response.date()).isEqualTo(LocalDate.parse("2026-06-05"));
+                            assertThat(response.category()).isEqualTo("Shopping");
+                            assertThat(response.assignedCategoryId()).isEqualTo("shopping");
                         });
     }
 
@@ -75,8 +120,7 @@ class TransactionControllerTest {
 
         TransactionResponse response =
                 newController()
-                        .assignCategory(
-                                "txn-1", new AssignTransactionCategoryRequest("shopping"));
+                        .assignCategory("txn-1", new AssignTransactionCategoryRequest("shopping"));
 
         assertThat(response.category()).isEqualTo("Shopping");
         assertThat(response.assignedCategoryId()).isEqualTo("shopping");
@@ -85,6 +129,9 @@ class TransactionControllerTest {
 
     private TransactionController newController() {
         return new TransactionController(
-                getTransactionsProcessor, assignTransactionCategoryProcessor, transactionConverter);
+                getTransactionsProcessor,
+                assignTransactionCategoryProcessor,
+                updateTransactionsProcessor,
+                transactionConverter);
     }
 }

@@ -40,8 +40,7 @@ class AssignTransactionCategoryProcessorTest {
                                 new BigDecimal("12.00"),
                                 "FOOD_AND_DRINK")
                         .withLocalCategoryId("groceries");
-        when(transactionService.updateLocalCategory("txn-1", "groceries"))
-                .thenReturn(assigned);
+        when(transactionService.updateLocalCategory("txn-1", "groceries")).thenReturn(assigned);
         when(transactionService.toView(eq(assigned), anyMap()))
                 .thenReturn(new TransactionView(assigned, "Groceries"));
         CategoryService categoryService = newCategoryService();

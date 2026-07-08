@@ -7,9 +7,11 @@ import com.localbudget.app.domain.model.PlaidItem;
 import com.localbudget.app.domain.model.TransactionDO;
 import com.localbudget.app.domain.model.TransactionView;
 import com.localbudget.app.domain.model.command.TransactionQueryCommand;
+import com.localbudget.app.domain.model.command.UpdateTransactionsCommand;
 import com.localbudget.app.domain.model.result.TransactionMergeResult;
 import com.localbudget.app.domain.service.helper.TransactionServiceHelper;
 import com.localbudget.app.gateway.plaid.api.PlaidGateway;
+import io.micrometer.common.util.StringUtils;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -90,8 +93,8 @@ public class TransactionService {
         LocalDate start = resolveStart(command);
         LocalDate end = resolveEnd(command);
         return findAll().stream()
-                .filter(transaction -> !transaction.date().isBefore(start))
-                .filter(transaction -> !transaction.date().isAfter(end))
+                .filter(transaction -> !transaction.effectiveDate().isBefore(start))
+                .filter(transaction -> !transaction.effectiveDate().isAfter(end))
                 .filter(
                         transaction ->
                                 command.accountId() == null
@@ -106,9 +109,10 @@ public class TransactionService {
                                                         transactionServiceHelper.displayCategory(
                                                                 transaction, displayNamesById)))
                 .sorted(
-                        Comparator.comparing(TransactionDO::date)
+                        Comparator.comparing(
+                                        (TransactionDO transaction) -> transaction.effectiveDate())
                                 .reversed()
-                                .thenComparing(TransactionDO::transactionId))
+                                .thenComparing(transaction -> transaction.transactionId()))
                 .map(transaction -> toView(transaction, displayNamesById))
                 .toList();
     }
@@ -141,9 +145,41 @@ public class TransactionService {
                 .orElseThrow();
     }
 
+    public List<TransactionDO> updateTransactions(UpdateTransactionsCommand command) {
+        if (!hasUpdates(command)) {
+            throw new IllegalArgumentException("No transaction update fields provided.");
+        }
+
+        List<TransactionDO> transactions = findAll();
+        Map<String, TransactionDO> byId = new LinkedHashMap<>();
+        for (TransactionDO transaction : transactions) {
+            byId.put(transaction.transactionId(), transaction);
+        }
+
+        List<String> requestedIds = uniqueIds(command.transactionIds());
+        List<String> missingIds =
+                requestedIds.stream()
+                        .filter(transactionId -> !byId.containsKey(transactionId))
+                        .toList();
+        if (!missingIds.isEmpty()) {
+            throw new NoSuchElementException(
+                    "Transaction not found: " + String.join(", ", missingIds));
+        }
+
+        List<TransactionDO> updated =
+                requestedIds.stream()
+                        .map(byId::get)
+                        .map(transaction -> applyUpdate(transaction, command))
+                        .toList();
+        transactionRepository.writeAll(
+                transactions.stream().map(transactionConverter::toCsv).toList());
+        return updated;
+    }
+
     public TransactionView toView(TransactionDO transaction, Map<String, String> displayNamesById) {
         return new TransactionView(
-                transaction, transactionServiceHelper.displayCategory(transaction, displayNamesById));
+                transaction,
+                transactionServiceHelper.displayCategory(transaction, displayNamesById));
     }
 
     private static LocalDate resolveStart(TransactionQueryCommand command) {
@@ -160,5 +196,29 @@ public class TransactionService {
         }
         YearMonth month = command.month() == null ? YearMonth.now() : command.month();
         return month.atEndOfMonth();
+    }
+
+    private static TransactionDO applyUpdate(
+            TransactionDO transaction, UpdateTransactionsCommand command) {
+        if (StringUtils.isNotBlank(command.customName())) {
+            transaction.withCustomName(command.customName());
+        }
+        if (StringUtils.isNotBlank(command.categoryId())) {
+            transaction.withLocalCategoryId(command.categoryId());
+        }
+        if (command.date() != null) {
+            transaction.withCustomDate(command.date());
+        }
+        return transaction;
+    }
+
+    private static boolean hasUpdates(UpdateTransactionsCommand command) {
+        return StringUtils.isNotBlank(command.customName())
+                || StringUtils.isNotBlank(command.categoryId())
+                || command.date() != null;
+    }
+
+    private static List<String> uniqueIds(Set<String> transactionIds) {
+        return transactionIds.stream().distinct().toList();
     }
 }

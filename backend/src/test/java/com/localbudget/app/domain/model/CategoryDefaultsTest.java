@@ -41,7 +41,6 @@ class CategoryDefaultsTest {
     void categoryIdNormalizesDisplayNames() {
         assertThat(CategoryDefaults.categoryId("Entertainment & Rec."))
                 .isEqualTo("entertainment-rec");
-        assertThat(CategoryDefaults.categoryId("  Software & Tech  "))
-                .isEqualTo("software-tech");
+        assertThat(CategoryDefaults.categoryId("  Software & Tech  ")).isEqualTo("software-tech");
     }
 }

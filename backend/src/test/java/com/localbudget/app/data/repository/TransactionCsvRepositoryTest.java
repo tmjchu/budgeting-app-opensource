@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.localbudget.app.TestFixtures;
 import com.localbudget.app.data.model.TransactionCsvRecord;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +34,14 @@ class TransactionCsvRepositoryTest {
                 .isEqualTo("Market \"Special\"");
         assertThat(Files.readString(dataDirectory.resolve("transactions.csv")))
                 .startsWith(
-                        "transaction_id,plaid_item_id,account_id,account_name,date,name,merchant_name,amount,primary_category,detailed_category,local_category,pending,excluded,payment_channel,local_category_id");
+                        "transaction_id,plaid_item_id,account_id,account_name,date,name,merchant_name,amount,primary_category,detailed_category,local_category,pending,excluded,payment_channel,local_category_id,custom_name,custom_date");
+        assertThat(repository.findById("txn-new"))
+                .get()
+                .satisfies(
+                        record -> {
+                            assertThat(record.customName()).isEqualTo("Custom txn-new");
+                            assertThat(record.customDate()).isEqualTo("2026-03-01");
+                        });
     }
 
     @Test
@@ -56,6 +62,8 @@ class TransactionCsvRepositoryTest {
         assertThat(record.excluded()).isEqualTo("false");
         assertThat(record.paymentChannel()).isEqualTo("in store");
         assertThat(record.localCategoryId()).isNull();
+        assertThat(record.customName()).isNull();
+        assertThat(record.customDate()).isNull();
     }
 
     private TransactionCsvRecord transaction(String id, String date, String merchantName) {
@@ -74,6 +82,8 @@ class TransactionCsvRepositoryTest {
                 "false",
                 "false",
                 "in store",
-                null);
+                null,
+                "Custom " + id,
+                id.equals("txn-new") ? "2026-03-01" : null);
     }
 }

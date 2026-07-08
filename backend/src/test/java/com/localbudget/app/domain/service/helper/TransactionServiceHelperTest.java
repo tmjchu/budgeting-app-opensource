@@ -48,7 +48,9 @@ class TransactionServiceHelperTest {
     })
     void defaultCategoryIdMapsPlaidCategories(
             String detailedCategory, String primaryCategory, String expectedCategoryId) {
-        assertThat(helper.defaultCategoryId(transaction(primaryCategory, detailedCategory, null, null)))
+        assertThat(
+                        helper.defaultCategoryId(
+                                transaction(primaryCategory, detailedCategory, null, null)))
                 .isEqualTo(expectedCategoryId);
     }
 

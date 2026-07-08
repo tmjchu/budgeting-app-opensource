@@ -23,7 +23,9 @@ public class StatsAggregationService {
         List<TransactionDO> included =
                 transactions.stream()
                         .filter(transaction -> !transaction.excluded())
-                        .filter(transaction -> YearMonth.from(transaction.date()).equals(month))
+                        .filter(
+                                transaction ->
+                                        YearMonth.from(transaction.effectiveDate()).equals(month))
                         .toList();
         BigDecimal income =
                 included.stream()
@@ -48,7 +50,9 @@ public class StatsAggregationService {
                 transactions.stream()
                         .filter(transaction -> !transaction.excluded())
                         .filter(transaction -> transaction.amount().signum() > 0)
-                        .filter(transaction -> YearMonth.from(transaction.date()).equals(month))
+                        .filter(
+                                transaction ->
+                                        YearMonth.from(transaction.effectiveDate()).equals(month))
                         .collect(
                                 Collectors.groupingBy(
                                         transaction ->

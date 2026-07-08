@@ -29,7 +29,9 @@ public class TransactionCsvRepository extends CsvSupport {
         "pending",
         "excluded",
         "payment_channel",
-        "local_category_id"
+        "local_category_id",
+        "custom_name",
+        "custom_date"
     };
 
     public TransactionCsvRepository(BudgetAppProperties properties) {
@@ -55,7 +57,9 @@ public class TransactionCsvRepository extends CsvSupport {
                                         value(record, "pending"),
                                         value(record, "excluded"),
                                         value(record, "payment_channel"),
-                                        value(record, "local_category_id")))
+                                        value(record, "local_category_id"),
+                                        value(record, "custom_name"),
+                                        value(record, "custom_date")))
                 .toList();
     }
 
@@ -68,7 +72,7 @@ public class TransactionCsvRepository extends CsvSupport {
     public void writeAll(List<TransactionCsvRecord> transactions) {
         List<TransactionCsvRecord> sorted = new ArrayList<>(transactions);
         sorted.sort(
-                Comparator.comparing(TransactionCsvRecord::date)
+                Comparator.comparing(TransactionCsvRepository::effectiveDate)
                         .reversed()
                         .thenComparing(TransactionCsvRecord::transactionId));
         writeRows(
@@ -92,8 +96,14 @@ public class TransactionCsvRepository extends CsvSupport {
                                                 value(record.pending()),
                                                 value(record.excluded()),
                                                 value(record.paymentChannel()),
-                                                value(record.localCategoryId())))
+                                                value(record.localCategoryId()),
+                                                value(record.customName()),
+                                                value(record.customDate())))
                         .toList());
+    }
+
+    private static String effectiveDate(TransactionCsvRecord transaction) {
+        return transaction.customDate() == null ? transaction.date() : transaction.customDate();
     }
 
     public void upsertAll(List<TransactionCsvRecord> transactions) {

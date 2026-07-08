@@ -54,10 +54,7 @@ class BalanceSnapshotServiceTest {
         Clock clock = Clock.fixed(syncedAt, ZoneOffset.UTC);
         BalanceSnapshotService service =
                 new BalanceSnapshotService(
-                        plaidGateway,
-                        repository,
-                        new BalanceSnapshotConverter(),
-                        clock);
+                        plaidGateway, repository, new BalanceSnapshotConverter(), clock);
 
         List<BalanceSnapshot> snapshots =
                 service.captureCurrentBalances(

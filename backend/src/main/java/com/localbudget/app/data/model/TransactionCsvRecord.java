@@ -15,4 +15,42 @@ public record TransactionCsvRecord(
         String pending,
         String excluded,
         String paymentChannel,
-        String localCategoryId) {}
+        String localCategoryId,
+        String customName,
+        String customDate) {
+    public TransactionCsvRecord(
+            String transactionId,
+            String plaidItemId,
+            String accountId,
+            String accountName,
+            String date,
+            String name,
+            String merchantName,
+            String amount,
+            String primaryCategory,
+            String detailedCategory,
+            String localCategory,
+            String pending,
+            String excluded,
+            String paymentChannel,
+            String localCategoryId) {
+        this(
+                transactionId,
+                plaidItemId,
+                accountId,
+                accountName,
+                date,
+                name,
+                merchantName,
+                amount,
+                primaryCategory,
+                detailedCategory,
+                localCategory,
+                pending,
+                excluded,
+                paymentChannel,
+                localCategoryId,
+                null,
+                null);
+    }
+}

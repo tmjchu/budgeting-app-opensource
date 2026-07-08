@@ -81,6 +81,8 @@ class TransactionConverterTest {
         assertThat(csvRecord.excluded()).isEqualTo("false");
         assertThat(csvRecord.paymentChannel()).isEqualTo("online");
         assertThat(csvRecord.localCategoryId()).isNull();
+        assertThat(csvRecord.customName()).isNull();
+        assertThat(csvRecord.customDate()).isNull();
     }
 
     @Test
@@ -101,12 +103,16 @@ class TransactionConverterTest {
                         "false",
                         "false",
                         "in store",
-                        null);
+                        null,
+                        "Custom coffee",
+                        "2026-07-01");
 
         TransactionDO transaction = converter.fromCsv(csvRecord);
 
         assertThat(transaction.localCategory()).isEqualTo("Dining & Drinks");
         assertThat(transaction.localCategoryId()).isEqualTo("dining-drinks");
+        assertThat(transaction.customName()).isEqualTo("Custom coffee");
+        assertThat(transaction.customDate()).isEqualTo(LocalDate.parse("2026-07-01"));
     }
 
     @Test
@@ -126,5 +132,24 @@ class TransactionConverterTest {
         assertThat(response.assignedCategoryName()).isEqualTo("Dining & Drinks");
         assertThat(response.primaryCategory()).isEqualTo("FOOD_AND_DRINK");
         assertThat(response.detailedCategory()).isEqualTo("FOOD_AND_DRINK_DETAIL");
+    }
+
+    @Test
+    void toResponseUsesCustomNameAndDateWhenPresent() {
+        TransactionDO transaction =
+                TestFixtures.transaction(
+                                "txn-4",
+                                LocalDate.parse("2026-06-29"),
+                                new BigDecimal("12.34"),
+                                "FOOD_AND_DRINK")
+                        .withCustomName("Custom coffee")
+                        .withCustomDate(LocalDate.parse("2026-07-01"));
+
+        TransactionResponse response = converter.toResponse(transaction, "FOOD_AND_DRINK");
+
+        assertThat(response.name()).isEqualTo("Custom coffee");
+        assertThat(response.date()).isEqualTo(LocalDate.parse("2026-07-01"));
+        assertThat(transaction.name()).isEqualTo("Transaction txn-4");
+        assertThat(transaction.date()).isEqualTo(LocalDate.parse("2026-06-29"));
     }
 }

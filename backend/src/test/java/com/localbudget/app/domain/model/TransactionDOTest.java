@@ -13,15 +13,15 @@ class TransactionDOTest {
     void effectiveCategoryUsesLegacyLocalThenPlaidThenUncategorized() {
         assertThat(transaction("local", "Legacy", null, "FOOD").effectiveCategory())
                 .isEqualTo("Legacy");
-        assertThat(transaction("plaid", null, null, "FOOD").effectiveCategory())
-                .isEqualTo("FOOD");
+        assertThat(transaction("plaid", null, null, "FOOD").effectiveCategory()).isEqualTo("FOOD");
         assertThat(transaction("unknown", null, null, null).effectiveCategory())
                 .isEqualTo("Uncategorized");
     }
 
     @Test
     void withLocalCategoryIdStoresStableIdAndClearsLegacyLocalCategory() {
-        TransactionDO updated = transaction("txn-1", "Legacy", null, "FOOD").withLocalCategoryId("groceries");
+        TransactionDO updated =
+                transaction("txn-1", "Legacy", null, "FOOD").withLocalCategoryId("groceries");
 
         assertThat(updated.localCategoryId()).isEqualTo("groceries");
         assertThat(updated.localCategory()).isNull();
@@ -38,6 +38,19 @@ class TransactionDOTest {
         assertThat(withLegacy.withLocalCategoryIdIfUnassigned("shopping")).isSameAs(withLegacy);
         assertThat(unassigned.withLocalCategoryIdIfUnassigned("shopping").localCategoryId())
                 .isEqualTo("shopping");
+    }
+
+    @Test
+    void customNameAndDateOverrideEffectiveValuesWithoutOverwritingPlaidValues() {
+        TransactionDO transaction =
+                transaction("custom", null, null, "FOOD")
+                        .withCustomName("Custom name")
+                        .withCustomDate(LocalDate.parse("2026-07-01"));
+
+        assertThat(transaction.effectiveName()).isEqualTo("Custom name");
+        assertThat(transaction.effectiveDate()).isEqualTo(LocalDate.parse("2026-07-01"));
+        assertThat(transaction.name()).isEqualTo("Name");
+        assertThat(transaction.date()).isEqualTo(LocalDate.parse("2026-06-01"));
     }
 
     private TransactionDO transaction(
