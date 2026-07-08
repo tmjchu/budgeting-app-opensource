@@ -17,7 +17,7 @@ public class GetCategoryStatsProcessor {
     private final CategoryService categoryService;
     private final StatsAggregationService statsAggregationService;
 
-    public List<CategoryStats> handle(YearMonth month) {
+    public List<CategoryStats> process(YearMonth month) {
         YearMonth resolvedMonth = month == null ? YearMonth.now() : month;
         return statsAggregationService.buildCategoryStats(
                 resolvedMonth, transactionService.findAll(), categoryService.displayNamesById());

@@ -26,7 +26,7 @@ public class PlaidLinkController {
 
     @PostMapping("/link-token")
     public LinkTokenResponse createLinkToken() {
-        return new LinkTokenResponse(createPlaidLinkTokenProcessor.handle());
+        return new LinkTokenResponse(createPlaidLinkTokenProcessor.process());
     }
 
     @PostMapping("/exchange-public-token")
@@ -39,7 +39,7 @@ public class PlaidLinkController {
                         request.selectedAccounts().stream()
                                 .map(accountConverter::toCommand)
                                 .toList());
-        return exchangePlaidPublicTokenProcessor.handle(command).trackedAccounts().stream()
+        return exchangePlaidPublicTokenProcessor.process(command).trackedAccounts().stream()
                 .map(accountConverter::toResponse)
                 .toList();
     }

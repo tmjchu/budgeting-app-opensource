@@ -18,7 +18,7 @@ public class CategoryController {
 
     @GetMapping
     public List<CategoryResponse> getCategories() {
-        return getCategoriesProcessor.handle().stream().map(this::toResponse).toList();
+        return getCategoriesProcessor.process().stream().map(this::toResponse).toList();
     }
 
     private CategoryResponse toResponse(CategoryDO category) {

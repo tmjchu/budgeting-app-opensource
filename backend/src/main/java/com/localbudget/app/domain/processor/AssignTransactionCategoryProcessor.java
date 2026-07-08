@@ -18,7 +18,7 @@ public class AssignTransactionCategoryProcessor {
     private final CategoryService categoryService;
     private final TransactionService transactionService;
 
-    public TransactionView handle(AssignTransactionCategoryCommand command) {
+    public TransactionView process(AssignTransactionCategoryCommand command) {
         categoryService
                 .findActiveById(command.categoryId())
                 .orElseThrow(

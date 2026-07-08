@@ -19,7 +19,7 @@ class CategoryControllerTest {
 
     @Test
     void getCategoriesReturnsCategoryResponses() {
-        when(getCategoriesProcessor.handle())
+        when(getCategoriesProcessor.process())
                 .thenReturn(
                         List.of(
                                 new CategoryDO(

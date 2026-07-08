@@ -12,7 +12,7 @@ public class GetAccountsProcessor {
 
     private final AccountService accountService;
 
-    public List<AccountDO> handle() {
+    public List<AccountDO> process() {
         return accountService.findAll();
     }
 }

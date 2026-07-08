@@ -32,7 +32,7 @@ class AssignTransactionCategoryProcessorTest {
     @Mock private TransactionService transactionService;
 
     @Test
-    void handleAssignsKnownActiveCategory() {
+    void processAssignsKnownActiveCategory() {
         TransactionDO assigned =
                 TestFixtures.transaction(
                                 "txn-1",
@@ -49,20 +49,20 @@ class AssignTransactionCategoryProcessorTest {
                 new AssignTransactionCategoryProcessor(categoryService, transactionService);
 
         TransactionView result =
-                processor.handle(new AssignTransactionCategoryCommand("txn-1", "groceries"));
+                processor.process(new AssignTransactionCategoryCommand("txn-1", "groceries"));
 
         assertThat(result.transaction().localCategoryId()).isEqualTo("groceries");
         assertThat(result.categoryDisplayName()).isEqualTo("Groceries");
     }
 
     @Test
-    void handleRejectsUnknownCategory() {
+    void processRejectsUnknownCategory() {
         AssignTransactionCategoryProcessor processor =
                 new AssignTransactionCategoryProcessor(newCategoryService(), transactionService);
 
         assertThatThrownBy(
                         () ->
-                                processor.handle(
+                                processor.process(
                                         new AssignTransactionCategoryCommand("txn-1", "not-real")))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Unknown category id");

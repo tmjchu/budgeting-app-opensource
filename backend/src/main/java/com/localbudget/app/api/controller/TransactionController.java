@@ -42,7 +42,7 @@ public class TransactionController {
             @RequestParam(required = false) String category) {
         TransactionQueryCommand command =
                 new TransactionQueryCommand(month, startDate, endDate, accountId, category);
-        return getTransactionsProcessor.handle(command).stream().map(this::toResponse).toList();
+        return getTransactionsProcessor.process(command).stream().map(this::toResponse).toList();
     }
 
     @PatchMapping("/{transactionId}/category")
@@ -50,7 +50,7 @@ public class TransactionController {
             @PathVariable String transactionId,
             @Valid @RequestBody AssignTransactionCategoryRequest request) {
         TransactionView transaction =
-                assignTransactionCategoryProcessor.handle(
+                assignTransactionCategoryProcessor.process(
                         new AssignTransactionCategoryCommand(transactionId, request.categoryId()));
         return toResponse(transaction);
     }

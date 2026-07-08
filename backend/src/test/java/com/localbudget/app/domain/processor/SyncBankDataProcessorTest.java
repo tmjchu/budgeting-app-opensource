@@ -43,7 +43,7 @@ class SyncBankDataProcessorTest {
     private final Clock clock = Clock.fixed(Instant.parse("2026-06-28T00:00:00Z"), ZoneOffset.UTC);
 
     @Test
-    void handleCoordinatesTransactionSyncAndBalanceCapture() {
+    void processCoordinatesTransactionSyncAndBalanceCapture() {
         SyncRun started =
                 new SyncRun(
                         "sync-1",
@@ -106,7 +106,7 @@ class SyncBankDataProcessorTest {
                 .thenReturn(List.of(snapshot));
         when(syncRunService.markSuccess(started, mergeResult, 1)).thenReturn(completed);
 
-        SyncResult result = handler().handle();
+        SyncResult result = handler().process();
 
         assertThat(result.syncRun()).isEqualTo(completed);
         assertThat(result.transactionMergeResult()).isEqualTo(mergeResult);
@@ -114,7 +114,7 @@ class SyncBankDataProcessorTest {
     }
 
     @Test
-    void handleMarksSyncRunFailedWhenAnyStepFails() {
+    void processMarksSyncRunFailedWhenAnyStepFails() {
         SyncRun started =
                 new SyncRun(
                         "sync-1",
@@ -129,7 +129,7 @@ class SyncBankDataProcessorTest {
         when(syncRunService.start()).thenReturn(started);
         when(plaidConnectionService.findConnectedItems()).thenThrow(failure);
 
-        assertThatThrownBy(() -> handler().handle()).isSameAs(failure);
+        assertThatThrownBy(() -> handler().process()).isSameAs(failure);
         verify(syncRunService).markFailed(started, failure);
     }
 

@@ -12,7 +12,7 @@ public class GetBalanceSnapshotsProcessor {
 
     private final BalanceSnapshotService balanceSnapshotService;
 
-    public List<BalanceSnapshot> handle() {
+    public List<BalanceSnapshot> process() {
         return balanceSnapshotService.findAll();
     }
 }

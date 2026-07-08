@@ -34,7 +34,7 @@ public class SyncBankDataProcessor {
     private final BalanceSnapshotService balanceSnapshotService;
     private final Clock clock;
 
-    public SyncResult handle() {
+    public SyncResult process() {
         SyncRun syncRun = syncRunService.start();
         try {
             List<PlaidItem> connectedItems = plaidConnectionService.findConnectedItems();

@@ -14,7 +14,7 @@ public class GetMonthlyStatsProcessor {
     private final TransactionService transactionService;
     private final StatsAggregationService statsAggregationService;
 
-    public MonthlyStats handle(YearMonth month) {
+    public MonthlyStats process(YearMonth month) {
         YearMonth resolvedMonth = month == null ? YearMonth.now() : month;
         return statsAggregationService.buildMonthlyStats(
                 resolvedMonth, transactionService.findAll());

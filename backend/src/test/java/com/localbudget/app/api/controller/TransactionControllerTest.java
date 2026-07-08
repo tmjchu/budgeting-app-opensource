@@ -39,7 +39,7 @@ class TransactionControllerTest {
                                 new BigDecimal("12.00"),
                                 "FOOD_AND_DRINK")
                         .withLocalCategoryId("groceries");
-        when(getTransactionsProcessor.handle(
+        when(getTransactionsProcessor.process(
                         new TransactionQueryCommand(
                                 YearMonth.parse("2026-06"), null, null, null, null)))
                 .thenReturn(List.of(new TransactionView(transaction, "Groceries")));
@@ -69,7 +69,7 @@ class TransactionControllerTest {
                                 new BigDecimal("12.00"),
                                 "FOOD_AND_DRINK")
                         .withLocalCategoryId("shopping");
-        when(assignTransactionCategoryProcessor.handle(
+        when(assignTransactionCategoryProcessor.process(
                         new AssignTransactionCategoryCommand("txn-1", "shopping")))
                 .thenReturn(new TransactionView(transaction, "Shopping"));
 

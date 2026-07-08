@@ -19,6 +19,6 @@ public class AccountController {
 
     @GetMapping
     public List<AccountResponse> getAccounts() {
-        return getAccountsProcessor.handle().stream().map(accountConverter::toResponse).toList();
+        return getAccountsProcessor.process().stream().map(accountConverter::toResponse).toList();
     }
 }

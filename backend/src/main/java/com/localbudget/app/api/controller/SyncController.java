@@ -18,6 +18,6 @@ public class SyncController {
 
     @PostMapping
     public SyncResponse sync() {
-        return syncRunConverter.toResponse(syncBankDataProcessor.handle());
+        return syncRunConverter.toResponse(syncBankDataProcessor.process());
     }
 }

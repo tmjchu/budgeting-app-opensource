@@ -19,7 +19,7 @@ public class BalanceController {
 
     @GetMapping("/snapshots")
     public List<BalanceSnapshotResponse> getBalanceSnapshots() {
-        return getBalanceSnapshotsProcessor.handle().stream()
+        return getBalanceSnapshotsProcessor.process().stream()
                 .map(balanceSnapshotConverter::toResponse)
                 .toList();
     }

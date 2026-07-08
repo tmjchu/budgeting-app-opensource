@@ -10,7 +10,7 @@ public class CreatePlaidLinkTokenProcessor {
 
     private final PlaidConnectionService plaidConnectionService;
 
-    public String handle() {
+    public String process() {
         return plaidConnectionService.createLinkToken();
     }
 }

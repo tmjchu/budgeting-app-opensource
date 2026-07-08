@@ -26,7 +26,7 @@ public class StatsController {
     @GetMapping("/monthly")
     public MonthlyStatsResponse getMonthlyStats(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
-        MonthlyStats stats = getMonthlyStatsProcessor.handle(month);
+        MonthlyStats stats = getMonthlyStatsProcessor.process(month);
         return new MonthlyStatsResponse(
                 stats.month().toString(),
                 stats.income(),
@@ -38,7 +38,7 @@ public class StatsController {
     @GetMapping("/categories")
     public List<CategoryStatsResponse> getCategoryStats(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth month) {
-        return getCategoryStatsProcessor.handle(month).stream().map(this::toResponse).toList();
+        return getCategoryStatsProcessor.process(month).stream().map(this::toResponse).toList();
     }
 
     private CategoryStatsResponse toResponse(CategoryStats stats) {

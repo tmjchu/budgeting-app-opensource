@@ -12,7 +12,7 @@ public class GetCategoriesProcessor {
 
     private final CategoryService categoryService;
 
-    public List<CategoryDO> handle() {
+    public List<CategoryDO> process() {
         return categoryService.findAll();
     }
 }

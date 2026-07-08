@@ -12,7 +12,7 @@ public class ExchangePlaidPublicTokenProcessor {
 
     private final PlaidConnectionService plaidConnectionService;
 
-    public ExchangePlaidPublicTokenResult handle(ExchangePlaidPublicTokenCommand command) {
+    public ExchangePlaidPublicTokenResult process(ExchangePlaidPublicTokenCommand command) {
         return plaidConnectionService.exchangePublicToken(command);
     }
 }

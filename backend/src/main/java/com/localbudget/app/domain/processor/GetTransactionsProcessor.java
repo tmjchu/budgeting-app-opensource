@@ -15,7 +15,7 @@ public class GetTransactionsProcessor {
     private final TransactionService transactionService;
     private final CategoryService categoryService;
 
-    public List<TransactionView> handle(TransactionQueryCommand command) {
+    public List<TransactionView> process(TransactionQueryCommand command) {
         return transactionService.find(command, categoryService.displayNamesById());
     }
 }
