@@ -44,22 +44,22 @@ class TransactionServiceTest {
     @Test
     void mergeIntoLocalStoreAddsNewTransactionsAndPreservesExistingLocalEdits() {
         TransactionDO existing =
-                new TransactionDO(
-                                "txn-1",
-                                "item-1",
-                                "acc-checking",
-                                "Main Checking",
-                                LocalDate.parse("2026-06-01"),
-                                "Old Name",
-                                "Old Merchant",
-                                new BigDecimal("10.00"),
-                                "FOOD_AND_DRINK",
-                                "FOOD_AND_DRINK_COFFEE",
-                                "Coffee",
-                                null,
-                                true,
-                                true,
-                                "in store")
+                TransactionDO.builder()
+                        .transactionId("txn-1")
+                        .plaidItemId("item-1")
+                        .accountId("acc-checking")
+                        .accountName("Main Checking")
+                        .date(LocalDate.parse("2026-06-01"))
+                        .name("Old Name")
+                        .merchantName("Old Merchant")
+                        .amount(new BigDecimal("10.00"))
+                        .primaryCategory("FOOD_AND_DRINK")
+                        .detailedCategory("FOOD_AND_DRINK_COFFEE")
+                        .localCategory("Coffee")
+                        .pending(true)
+                        .excluded(true)
+                        .paymentChannel("in store")
+                        .build()
                         .withCustomName("Custom coffee")
                         .withCustomDate(LocalDate.parse("2026-06-10"));
         TransactionDO fetchedUpdated =
@@ -253,22 +253,22 @@ class TransactionServiceTest {
     @Test
     void updateLocalCategoryPersistsSelectedCategoryAndClearsLegacyCategory() {
         TransactionDO existing =
-                new TransactionDO(
-                        "txn-1",
-                        "item-1",
-                        "acc-checking",
-                        "Main Checking",
-                        LocalDate.parse("2026-06-01"),
-                        "Old Name",
-                        "Old Merchant",
-                        new BigDecimal("10.00"),
-                        "FOOD_AND_DRINK",
-                        "FOOD_AND_DRINK_COFFEE",
-                        "Legacy",
-                        null,
-                        false,
-                        false,
-                        "in store");
+                TransactionDO.builder()
+                        .transactionId("txn-1")
+                        .plaidItemId("item-1")
+                        .accountId("acc-checking")
+                        .accountName("Main Checking")
+                        .date(LocalDate.parse("2026-06-01"))
+                        .name("Old Name")
+                        .merchantName("Old Merchant")
+                        .amount(new BigDecimal("10.00"))
+                        .primaryCategory("FOOD_AND_DRINK")
+                        .detailedCategory("FOOD_AND_DRINK_COFFEE")
+                        .localCategory("Legacy")
+                        .pending(false)
+                        .excluded(false)
+                        .paymentChannel("in store")
+                        .build();
         when(repository.findAll()).thenReturn(List.of(converter.toCsv(existing)));
 
         TransactionDO updated = newService().updateLocalCategory("txn-1", "groceries");

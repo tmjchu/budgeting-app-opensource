@@ -55,21 +55,22 @@ class TransactionDOTest {
 
     private TransactionDO transaction(
             String id, String legacyLocalCategory, String localCategoryId, String primaryCategory) {
-        return new TransactionDO(
-                id,
-                TestFixtures.plaidItem().plaidItemId(),
-                TestFixtures.checkingAccount().accountId(),
-                TestFixtures.checkingAccount().name(),
-                LocalDate.parse("2026-06-01"),
-                "Name",
-                "Merchant",
-                new BigDecimal("12.00"),
-                primaryCategory,
-                primaryCategory == null ? null : primaryCategory + "_DETAIL",
-                legacyLocalCategory,
-                localCategoryId,
-                false,
-                false,
-                "in store");
+        return TransactionDO.builder()
+                .transactionId(id)
+                .plaidItemId(TestFixtures.plaidItem().plaidItemId())
+                .accountId(TestFixtures.checkingAccount().accountId())
+                .accountName(TestFixtures.checkingAccount().name())
+                .date(LocalDate.parse("2026-06-01"))
+                .name("Name")
+                .merchantName("Merchant")
+                .amount(new BigDecimal("12.00"))
+                .primaryCategory(primaryCategory)
+                .detailedCategory(primaryCategory == null ? null : primaryCategory + "_DETAIL")
+                .localCategory(legacyLocalCategory)
+                .localCategoryId(localCategoryId)
+                .pending(false)
+                .excluded(false)
+                .paymentChannel("in store")
+                .build();
     }
 }

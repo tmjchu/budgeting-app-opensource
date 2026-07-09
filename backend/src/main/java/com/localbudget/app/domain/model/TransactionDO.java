@@ -2,18 +2,14 @@ package com.localbudget.app.domain.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode
-@AllArgsConstructor
+@Builder
 @Accessors(fluent = true)
 public class TransactionDO {
 
@@ -34,42 +30,6 @@ public class TransactionDO {
     private String paymentChannel;
     private String customName;
     private LocalDate customDate;
-
-    public TransactionDO(
-            String transactionId,
-            String plaidItemId,
-            String accountId,
-            String accountName,
-            LocalDate date,
-            String name,
-            String merchantName,
-            BigDecimal amount,
-            String primaryCategory,
-            String detailedCategory,
-            String localCategory,
-            String localCategoryId,
-            boolean pending,
-            boolean excluded,
-            String paymentChannel) {
-        this(
-                transactionId,
-                plaidItemId,
-                accountId,
-                accountName,
-                date,
-                name,
-                merchantName,
-                amount,
-                primaryCategory,
-                detailedCategory,
-                localCategory,
-                localCategoryId,
-                pending,
-                excluded,
-                paymentChannel,
-                null,
-                null);
-    }
 
     public String effectiveCategory() {
         if (localCategory != null && !localCategory.isBlank()) {

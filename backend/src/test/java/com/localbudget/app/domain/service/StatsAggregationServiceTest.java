@@ -69,22 +69,22 @@ class StatsAggregationServiceTest {
                         new BigDecimal("40.00"),
                         "FOOD_AND_DRINK");
         TransactionDO localOverride =
-                new TransactionDO(
-                        "coffee",
-                        "item-1",
-                        "acc-checking",
-                        "Main Checking",
-                        LocalDate.parse("2026-06-03"),
-                        "Coffee",
-                        "Coffee",
-                        new BigDecimal("5.00"),
-                        "FOOD_AND_DRINK",
-                        "FOOD_AND_DRINK_COFFEE",
-                        "Treats",
-                        null,
-                        false,
-                        false,
-                        "in store");
+                TransactionDO.builder()
+                        .transactionId("coffee")
+                        .plaidItemId("item-1")
+                        .accountId("acc-checking")
+                        .accountName("Main Checking")
+                        .date(LocalDate.parse("2026-06-03"))
+                        .name("Coffee")
+                        .merchantName("Coffee")
+                        .amount(new BigDecimal("5.00"))
+                        .primaryCategory("FOOD_AND_DRINK")
+                        .detailedCategory("FOOD_AND_DRINK_COFFEE")
+                        .localCategory("Treats")
+                        .pending(false)
+                        .excluded(false)
+                        .paymentChannel("in store")
+                        .build();
         TransactionDO assignedGroceries =
                 TestFixtures.transaction(
                                 "assigned",
@@ -108,22 +108,23 @@ class StatsAggregationServiceTest {
 
     private TransactionDO excluded(String id, LocalDate date, BigDecimal amount) {
         TransactionDO transaction = TestFixtures.transaction(id, date, amount, "TRANSFER");
-        return new TransactionDO(
-                transaction.transactionId(),
-                transaction.plaidItemId(),
-                transaction.accountId(),
-                transaction.accountName(),
-                transaction.date(),
-                transaction.name(),
-                transaction.merchantName(),
-                transaction.amount(),
-                transaction.primaryCategory(),
-                transaction.detailedCategory(),
-                transaction.localCategory(),
-                transaction.localCategoryId(),
-                transaction.pending(),
-                true,
-                transaction.paymentChannel());
+        return TransactionDO.builder()
+                .transactionId(transaction.transactionId())
+                .plaidItemId(transaction.plaidItemId())
+                .accountId(transaction.accountId())
+                .accountName(transaction.accountName())
+                .date(transaction.date())
+                .name(transaction.name())
+                .merchantName(transaction.merchantName())
+                .amount(transaction.amount())
+                .primaryCategory(transaction.primaryCategory())
+                .detailedCategory(transaction.detailedCategory())
+                .localCategory(transaction.localCategory())
+                .localCategoryId(transaction.localCategoryId())
+                .pending(transaction.pending())
+                .excluded(true)
+                .paymentChannel(transaction.paymentChannel())
+                .build();
     }
 
     private StatsAggregationService newService() {

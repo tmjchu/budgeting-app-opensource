@@ -39,21 +39,20 @@ public final class TestFixtures {
 
     public static TransactionDO transaction(
             String id, LocalDate date, BigDecimal amount, String category) {
-        return new TransactionDO(
-                id,
-                "item-1",
-                "acc-checking",
-                "Main Checking",
-                date,
-                "Transaction " + id,
-                "Merchant " + id,
-                amount,
-                category,
-                category == null ? null : category + "_DETAIL",
-                null,
-                null,
-                false,
-                false,
-                "in store");
+        return TransactionDO.builder()
+                .transactionId(id)
+                .plaidItemId("item-1")
+                .accountId("acc-checking")
+                .accountName("Main Checking")
+                .date(date)
+                .name("Transaction " + id)
+                .merchantName("Merchant " + id)
+                .amount(amount)
+                .primaryCategory(category)
+                .detailedCategory(category == null ? null : category + "_DETAIL")
+                .pending(false)
+                .excluded(false)
+                .paymentChannel("in store")
+                .build();
     }
 }

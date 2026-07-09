@@ -81,21 +81,22 @@ class TransactionServiceHelperTest {
             String detailedCategory,
             String legacyLocalCategory,
             String localCategoryId) {
-        return new TransactionDO(
-                "txn-1",
-                "item-1",
-                "acc-1",
-                "Checking",
-                LocalDate.parse("2026-06-01"),
-                "Name",
-                "Merchant",
-                new BigDecimal("12.00"),
-                primaryCategory,
-                detailedCategory,
-                legacyLocalCategory,
-                localCategoryId,
-                false,
-                false,
-                "in store");
+        return TransactionDO.builder()
+                .transactionId("txn-1")
+                .plaidItemId("item-1")
+                .accountId("acc-1")
+                .accountName("Checking")
+                .date(LocalDate.parse("2026-06-01"))
+                .name("Name")
+                .merchantName("Merchant")
+                .amount(new BigDecimal("12.00"))
+                .primaryCategory(primaryCategory)
+                .detailedCategory(detailedCategory)
+                .localCategory(legacyLocalCategory)
+                .localCategoryId(localCategoryId)
+                .pending(false)
+                .excluded(false)
+                .paymentChannel("in store")
+                .build();
     }
 }

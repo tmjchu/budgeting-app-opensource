@@ -23,24 +23,25 @@ public class TransactionServiceHelper {
         if (existing == null) {
             return fetched;
         }
-        return new TransactionDO(
-                fetched.transactionId(),
-                fetched.plaidItemId(),
-                fetched.accountId(),
-                fetched.accountName(),
-                fetched.date(),
-                fetched.name(),
-                fetched.merchantName(),
-                fetched.amount(),
-                fetched.primaryCategory(),
-                fetched.detailedCategory(),
-                existing.localCategory(),
-                existing.localCategoryId(),
-                fetched.pending(),
-                existing.excluded(),
-                fetched.paymentChannel(),
-                existing.customName(),
-                existing.customDate());
+        return TransactionDO.builder()
+                .transactionId(fetched.transactionId())
+                .plaidItemId(fetched.plaidItemId())
+                .accountId(fetched.accountId())
+                .accountName(fetched.accountName())
+                .date(fetched.date())
+                .name(fetched.name())
+                .merchantName(fetched.merchantName())
+                .amount(fetched.amount())
+                .primaryCategory(fetched.primaryCategory())
+                .detailedCategory(fetched.detailedCategory())
+                .localCategory(existing.localCategory())
+                .localCategoryId(existing.localCategoryId())
+                .pending(fetched.pending())
+                .excluded(existing.excluded())
+                .paymentChannel(fetched.paymentChannel())
+                .customName(existing.customName())
+                .customDate(existing.customDate())
+                .build();
     }
 
     public String displayCategory(TransactionDO transaction, Map<String, String> displayNamesById) {

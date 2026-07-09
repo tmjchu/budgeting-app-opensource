@@ -27,45 +27,46 @@ public class TransactionConverter {
         AccountDO account = accountById.get(transaction.getAccountId());
         PersonalFinanceCategory category = transaction.getPersonalFinanceCategory();
 
-        return new TransactionDO(
-                transaction.getTransactionId(),
-                plaidItem.plaidItemId(),
-                transaction.getAccountId(),
-                account == null ? null : account.name(),
-                transaction.getDate(),
-                transaction.getName(),
-                transaction.getMerchantName(),
-                amount(transaction.getAmount()),
-                category == null ? null : category.getPrimary(),
-                category == null ? null : category.getDetailed(),
-                null,
-                null,
-                Boolean.TRUE.equals(transaction.getPending()),
-                false,
-                value(transaction.getPaymentChannel()));
+        return TransactionDO.builder()
+                .transactionId(transaction.getTransactionId())
+                .plaidItemId(plaidItem.plaidItemId())
+                .accountId(transaction.getAccountId())
+                .accountName(account == null ? null : account.name())
+                .date(transaction.getDate())
+                .name(transaction.getName())
+                .merchantName(transaction.getMerchantName())
+                .amount(amount(transaction.getAmount()))
+                .primaryCategory(category == null ? null : category.getPrimary())
+                .detailedCategory(category == null ? null : category.getDetailed())
+                .pending(Boolean.TRUE.equals(transaction.getPending()))
+                .excluded(false)
+                .paymentChannel(value(transaction.getPaymentChannel()))
+                .build();
     }
 
     public TransactionDO fromCsv(TransactionCsvRecord transactionCsvRecord) {
-        return new TransactionDO(
-                transactionCsvRecord.transactionId(),
-                transactionCsvRecord.plaidItemId(),
-                transactionCsvRecord.accountId(),
-                transactionCsvRecord.accountName(),
-                LocalDate.parse(transactionCsvRecord.date()),
-                transactionCsvRecord.name(),
-                transactionCsvRecord.merchantName(),
-                parseAmount(transactionCsvRecord.amount()),
-                transactionCsvRecord.primaryCategory(),
-                transactionCsvRecord.detailedCategory(),
-                transactionCsvRecord.localCategory(),
-                localCategoryId(
-                        transactionCsvRecord.localCategoryId(),
-                        transactionCsvRecord.localCategory()),
-                Boolean.parseBoolean(transactionCsvRecord.pending()),
-                Boolean.parseBoolean(transactionCsvRecord.excluded()),
-                transactionCsvRecord.paymentChannel(),
-                transactionCsvRecord.customName(),
-                parseDate(transactionCsvRecord.customDate()));
+        return TransactionDO.builder()
+                .transactionId(transactionCsvRecord.transactionId())
+                .plaidItemId(transactionCsvRecord.plaidItemId())
+                .accountId(transactionCsvRecord.accountId())
+                .accountName(transactionCsvRecord.accountName())
+                .date(LocalDate.parse(transactionCsvRecord.date()))
+                .name(transactionCsvRecord.name())
+                .merchantName(transactionCsvRecord.merchantName())
+                .amount(parseAmount(transactionCsvRecord.amount()))
+                .primaryCategory(transactionCsvRecord.primaryCategory())
+                .detailedCategory(transactionCsvRecord.detailedCategory())
+                .localCategory(transactionCsvRecord.localCategory())
+                .localCategoryId(
+                        localCategoryId(
+                                transactionCsvRecord.localCategoryId(),
+                                transactionCsvRecord.localCategory()))
+                .pending(Boolean.parseBoolean(transactionCsvRecord.pending()))
+                .excluded(Boolean.parseBoolean(transactionCsvRecord.excluded()))
+                .paymentChannel(transactionCsvRecord.paymentChannel())
+                .customName(transactionCsvRecord.customName())
+                .customDate(parseDate(transactionCsvRecord.customDate()))
+                .build();
     }
 
     public TransactionCsvRecord toCsv(TransactionDO transaction) {
