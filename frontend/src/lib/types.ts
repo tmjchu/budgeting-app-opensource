@@ -56,3 +56,11 @@ export type Transaction = {
   excluded: boolean;
   paymentChannel?: string;
 };
+
+export type TransactionQuery = {
+  month?: string;
+  startDate?: string;
+  endDate?: string;
+  accountId?: string;
+  category?: string;
+};

@@ -4,7 +4,8 @@ import type {
   CategoryStats,
   MonthlyStats,
   SyncResult,
-  Transaction
+  Transaction,
+  TransactionQuery
 } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
@@ -45,8 +46,24 @@ export const api = {
     }),
   sync: async () => request<SyncResult>('/api/sync', { method: 'POST' }),
   getAccounts: async () => request<Account[]>('/api/accounts'),
-  getTransactions: async (month: string) => request<Transaction[]>(`/api/transactions?month=${month}`),
+  getTransactions: async (query: string | TransactionQuery) =>
+    request<Transaction[]>(`/api/transactions${transactionQuery(query)}`),
   getMonthlyStats: async (month: string) => request<MonthlyStats>(`/api/stats/monthly?month=${month}`),
   getCategoryStats: async (month: string) => request<CategoryStats[]>(`/api/stats/categories?month=${month}`),
   getBalanceSnapshots: async () => request<BalanceSnapshot[]>('/api/balances/snapshots')
 };
+
+function transactionQuery(query: string | TransactionQuery) {
+  const params = new URLSearchParams();
+  if (typeof query === 'string') {
+    params.set('month', query);
+  } else {
+    for (const [key, value] of Object.entries(query)) {
+      if (value != null && value !== '') {
+        params.set(key, value);
+      }
+    }
+  }
+  const queryString = params.toString();
+  return queryString ? `?${queryString}` : '';
+}
