@@ -10,12 +10,14 @@ import com.localbudget.app.domain.processor.ExchangePlaidPublicTokenProcessor;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/plaid")
 @RequiredArgsConstructor
 public class PlaidLinkController {
@@ -26,12 +28,16 @@ public class PlaidLinkController {
 
     @PostMapping("/link-token")
     public LinkTokenResponse createLinkToken() {
-        return new LinkTokenResponse(createPlaidLinkTokenProcessor.process());
+        log.info("Create Link Token API Invoked");
+        LinkTokenResponse response = new LinkTokenResponse(createPlaidLinkTokenProcessor.process());
+        log.info("Create Link Token API Completed");
+        return response;
     }
 
     @PostMapping("/exchange-public-token")
     public List<AccountResponse> exchangePublicToken(
             @Valid @RequestBody ExchangePublicTokenRequest request) {
+        log.info("Exchange Public Token API Invoked");
         ExchangePlaidPublicTokenCommand command =
                 new ExchangePlaidPublicTokenCommand(
                         request.publicToken(),
@@ -39,8 +45,11 @@ public class PlaidLinkController {
                         request.selectedAccounts().stream()
                                 .map(accountConverter::toCommand)
                                 .toList());
-        return exchangePlaidPublicTokenProcessor.process(command).trackedAccounts().stream()
-                .map(accountConverter::toResponse)
-                .toList();
+        List<AccountResponse> response =
+                exchangePlaidPublicTokenProcessor.process(command).trackedAccounts().stream()
+                        .map(accountConverter::toResponse)
+                        .toList();
+        log.info("Exchange Public Token API Completed");
+        return response;
     }
 }

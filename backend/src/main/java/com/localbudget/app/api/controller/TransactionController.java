@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
 public class TransactionController {
@@ -45,21 +47,31 @@ public class TransactionController {
                     LocalDate endDate,
             @RequestParam(required = false) String accountId,
             @RequestParam(required = false) String category) {
+        log.info("Get Transactions API Invoked");
         TransactionQueryCommand command =
                 new TransactionQueryCommand(month, startDate, endDate, accountId, category);
-        return getTransactionsProcessor.process(command).stream().map(this::toResponse).toList();
+        List<TransactionResponse> response =
+                getTransactionsProcessor.process(command).stream().map(this::toResponse).toList();
+        log.info("Get Transactions API Completed");
+        return response;
     }
 
     @PostMapping("/update")
     public List<TransactionResponse> updateTransactions(
             @Valid @RequestBody UpdateTransactionsRequest request) {
+        log.info("Update Transactions API Invoked");
         UpdateTransactionsCommand command =
                 new UpdateTransactionsCommand(
                         request.transactionIds(),
                         request.customName(),
                         request.categoryId(),
                         request.date());
-        return updateTransactionsProcessor.process(command).stream().map(this::toResponse).toList();
+        List<TransactionResponse> response =
+                updateTransactionsProcessor.process(command).stream()
+                        .map(this::toResponse)
+                        .toList();
+        log.info("Update Transactions API Completed");
+        return response;
     }
 
     /**
@@ -70,10 +82,13 @@ public class TransactionController {
     public TransactionResponse assignCategory(
             @PathVariable String transactionId,
             @Valid @RequestBody AssignTransactionCategoryRequest request) {
+        log.info("Assign Transaction Category API Invoked");
         TransactionView transaction =
                 assignTransactionCategoryProcessor.process(
                         new AssignTransactionCategoryCommand(transactionId, request.categoryId()));
-        return toResponse(transaction);
+        TransactionResponse response = toResponse(transaction);
+        log.info("Assign Transaction Category API Completed");
+        return response;
     }
 
     private TransactionResponse toResponse(TransactionView transaction) {
