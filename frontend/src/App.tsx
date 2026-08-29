@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePlaidLink } from './hooks/usePlaidLink';
-import { api } from './lib/api';
+import { api, isMockMode } from './lib/api';
 import { formatCurrency, formatDateTime } from './lib/format';
 import type {
   Account,
@@ -97,23 +97,6 @@ function largestPurchases(transactions: Transaction[]) {
     .slice()
     .sort((left, right) => right.amount - left.amount)
     .slice(0, 4);
-}
-
-function dailySpend(month: string, transactions: Transaction[]) {
-  const [year, monthIndex] = month.split('-').map(Number);
-  const days = new Date(year, monthIndex, 0).getDate();
-  const totals = Array.from({ length: days }, (_, index) => ({
-    day: index + 1,
-    amount: 0
-  }));
-  for (const transaction of spendTransactions(transactions)) {
-    if (!transaction.date.startsWith(month)) {
-      continue;
-    }
-    const day = Number(transaction.date.slice(8, 10));
-    totals[day - 1].amount += transaction.amount;
-  }
-  return totals;
 }
 
 function latestBalancesByAccount(snapshots: BalanceSnapshot[]) {
@@ -266,13 +249,15 @@ export function App() {
     <main className="desktop-app">
       <Sidebar activeView={activeView} onChange={setActiveView} />
       <section className="workspace">
+        {isMockMode && <div className="mock-ribbon">UI mock · sample data</div>}
         <Topbar
           activeView={activeView}
           month={month}
           isConnecting={isConnecting}
           isSyncing={isSyncing}
+          isMockMode={isMockMode}
           onMonthChange={setMonth}
-          onConnect={connect}
+          onConnect={isMockMode ? () => undefined : connect}
           onSync={syncNow}
         />
 
@@ -286,7 +271,6 @@ export function App() {
 
         {activeView === 'dashboard' && (
           <DashboardView
-            month={month}
             stats={monthlyStats}
             transactions={transactions}
             accounts={accounts}
@@ -375,6 +359,7 @@ function Topbar({
   month,
   isConnecting,
   isSyncing,
+  isMockMode,
   onMonthChange,
   onConnect,
   onSync
@@ -383,6 +368,7 @@ function Topbar({
   month: string;
   isConnecting: boolean;
   isSyncing: boolean;
+  isMockMode: boolean;
   onMonthChange: (month: string) => void;
   onConnect: () => void;
   onSync: () => void;
@@ -410,8 +396,8 @@ function Topbar({
           value={month}
           onChange={(event) => onMonthChange(event.target.value)}
         />
-        <button className="button secondary" onClick={onConnect} disabled={isConnecting || isSyncing}>
-          {isConnecting ? 'Connecting...' : 'Connect account'}
+        <button className="button secondary" onClick={onConnect} disabled={isMockMode || isConnecting || isSyncing}>
+          {isMockMode ? 'Demo accounts' : isConnecting ? 'Connecting...' : 'Connect account'}
         </button>
         <button className="button primary" onClick={onSync} disabled={isSyncing || isConnecting}>
           {isSyncing ? 'Syncing...' : 'Sync now'}
@@ -422,14 +408,12 @@ function Topbar({
 }
 
 function DashboardView({
-  month,
   stats,
   transactions,
   accounts,
   balances,
   isLoading
 }: {
-  month: string;
   stats: MonthlyStats | null;
   transactions: Transaction[];
   accounts: Account[];
@@ -448,25 +432,6 @@ function DashboardView({
       </div>
 
       <div className="dashboard-grid">
-        <section className="card hero-card">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">This month</p>
-              <h2>Spending trend</h2>
-            </div>
-            <strong>{formatCurrency(stats?.spending ?? 0)}</strong>
-          </div>
-          <TrendChart month={month} transactions={transactions} />
-        </section>
-
-        <section className="card">
-          <div className="section-heading">
-            <h2>Accounts</h2>
-            <span>{accounts.length}</span>
-          </div>
-          <CompactAccountList accounts={accounts} />
-        </section>
-
         <section className="card tall-card">
           <div className="section-heading">
             <h2>Recent transactions</h2>
@@ -477,10 +442,13 @@ function DashboardView({
 
         <section className="card tall-card">
           <div className="section-heading">
-            <h2>Latest balances</h2>
-            <span>{balances.length}</span>
+            <div>
+              <p className="eyebrow">Latest balances</p>
+              <h2>Accounts</h2>
+            </div>
+            <span>{accounts.length}</span>
           </div>
-          <BalanceList balances={balances} />
+          <AccountBalanceList accounts={accounts} balances={balances} />
         </section>
       </div>
     </div>
@@ -725,36 +693,6 @@ function CategoryChip({ category }: { category: string }) {
   );
 }
 
-function TrendChart({ month, transactions }: { month: string; transactions: Transaction[] }) {
-  const points = dailySpend(month, transactions);
-  const max = Math.max(...points.map((point) => point.amount), 0);
-  const width = 720;
-  const height = 220;
-  const step = width / Math.max(points.length - 1, 1);
-  const path = points
-    .map((point, index) => {
-      const x = index * step;
-      const y = max === 0 ? height - 24 : height - 24 - (point.amount / max) * 160;
-      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
-    })
-    .join(' ');
-
-  return (
-    <div className="trend-frame">
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Daily spending trend">
-        <path className="trend-grid" d="M 0 44 H 720 M 0 92 H 720 M 0 140 H 720 M 0 188 H 720" />
-        <path className="trend-area" d={`${path} L ${width} ${height - 24} L 0 ${height - 24} Z`} />
-        <path className="trend-line" d={path} />
-      </svg>
-      <div className="trend-axis">
-        <span>1st</span>
-        <span>15th</span>
-        <span>{points.length}th</span>
-      </div>
-    </div>
-  );
-}
-
 function DonutChart({ categories, total }: { categories: CategoryStats[]; total: number }) {
   let offset = 25;
   const radius = 72;
@@ -939,6 +877,48 @@ function BalanceList({ balances }: { balances: BalanceSnapshot[] }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function AccountBalanceList({ accounts, balances }: { accounts: Account[]; balances: BalanceSnapshot[] }) {
+  if (accounts.length === 0) {
+    return <p className="empty-state">Connect an account to start tracking local budget data.</p>;
+  }
+
+  const balanceByAccount = new Map(balances.map((balance) => [balance.accountId, balance]));
+
+  return (
+    <div className="list-stack">
+      {accounts.map((account) => {
+        const balance = balanceByAccount.get(account.accountId);
+        const isCreditCard = account.type === 'credit' || account.subtype?.toLowerCase().includes('credit');
+        const isCashAccount = ['checking', 'savings'].includes(account.subtype?.toLowerCase() ?? '');
+        const primaryBalance = isCashAccount ? balance?.availableBalance : balance?.currentBalance;
+        const secondaryLabel = isCreditCard
+          ? 'Available credit'
+          : isCashAccount
+            ? 'Cleared balance'
+            : 'Available balance';
+        const secondaryBalance = isCreditCard || !isCashAccount ? balance?.availableBalance : balance?.currentBalance;
+
+        return (
+          <div className="account-balance-line" key={account.accountId}>
+            <span className="account-avatar">{account.name.charAt(0).toUpperCase()}</span>
+            <div className="account-balance-details">
+              <strong>{account.name}</strong>
+              <p>
+                {account.subtype ?? account.type ?? 'Account'}
+                {account.mask ? ` • ${account.mask}` : ''}
+              </p>
+            </div>
+            <div className="money-block">
+              <strong>{balance ? formatCurrency(primaryBalance ?? 0) : '—'}</strong>
+              <p>{balance ? `${secondaryLabel} ${formatCurrency(secondaryBalance ?? 0)}` : 'No balance yet'}</p>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

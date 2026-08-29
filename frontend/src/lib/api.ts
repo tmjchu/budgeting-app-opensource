@@ -7,8 +7,10 @@ import type {
   Transaction,
   TransactionQuery
 } from './types';
+import { mockApi } from './mockData';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
+export const isMockMode = import.meta.env.VITE_MOCK_MODE === 'true';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -27,7 +29,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export const api = {
+const liveApi = {
   createLinkToken: async () => request<{ linkToken: string }>('/api/plaid/link-token', { method: 'POST' }),
   exchangePublicToken: async (publicToken: string, metadata: PlaidSuccessMetadata) =>
     request<Account[]>('/api/plaid/exchange-public-token', {
@@ -52,6 +54,8 @@ export const api = {
   getCategoryStats: async (month: string) => request<CategoryStats[]>(`/api/stats/categories?month=${month}`),
   getBalanceSnapshots: async () => request<BalanceSnapshot[]>('/api/balances/snapshots')
 };
+
+export const api = isMockMode ? mockApi : liveApi;
 
 function transactionQuery(query: string | TransactionQuery) {
   const params = new URLSearchParams();

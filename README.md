@@ -59,6 +59,17 @@ npm run dev -- --host 127.0.0.1
 
 Open `http://127.0.0.1:5173`.
 
+### UI mock mode
+
+Work on every frontend screen with realistic sample data and no backend or Plaid setup:
+
+```bash
+cd frontend
+npm run mock
+```
+
+The editable mock dataset lives in `frontend/src/lib/mockData.ts`.
+
 ## Data Files
 
 The backend writes local CSV data under `backend/data` by default:
