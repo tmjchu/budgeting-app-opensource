@@ -8,7 +8,8 @@
     "mock": "vite --mode mock",
     "build": "tsc --noEmit -p tsconfig.json && vite build",
     "build:mock": "tsc --noEmit -p tsconfig.json && vite build --mode mock",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:logos": "node --experimental-strip-types --test tests/institutionResolver.test.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

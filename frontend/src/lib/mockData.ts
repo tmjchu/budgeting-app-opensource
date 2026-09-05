@@ -6,9 +6,9 @@ const MOCK_MONTH = now.toISOString().slice(0, 7);
 const day = (value: number) => `${MOCK_MONTH}-${String(value).padStart(2, '0')}`;
 
 export const mockAccounts: Account[] = [
-  { accountId: 'checking', name: 'Everyday Checking', mask: '2841', type: 'depository', subtype: 'checking', tracked: true },
-  { accountId: 'savings', name: 'Rainy Day Savings', mask: '9017', type: 'depository', subtype: 'savings', tracked: true },
-  { accountId: 'credit', name: 'Everyday Card', mask: '4420', type: 'credit', subtype: 'credit card', tracked: true }
+  { accountId: 'checking', institutionName: 'Chase', name: 'Everyday Checking', mask: '2841', type: 'depository', subtype: 'checking', tracked: true },
+  { accountId: 'savings', institutionName: 'Neighborhood Credit Union', name: 'Rainy Day Savings', mask: '9017', type: 'depository', subtype: 'savings', tracked: true },
+  { accountId: 'credit', institutionName: 'American Express', name: 'Everyday Card', mask: '4420', type: 'credit', subtype: 'credit card', tracked: true }
 ];
 
 export const mockTransactions: Transaction[] = [
