@@ -533,15 +533,25 @@ h2 {
   grid-template-columns: 172px minmax(0, 1fr) auto;
 }
 
-.account-avatar {
+.account-logo {
   display: grid;
-  width: 34px;
-  height: 34px;
+  flex-shrink: 0;
+  box-sizing: border-box;
   place-items: center;
-  border-radius: 50%;
-  background: #edf1ff;
-  color: #3f6df6;
-  font-weight: 900;
+  padding: 5px;
+  border: 1px solid #e7eaf0;
+  border-radius: 9px;
+  background: #fff;
+  color: #67748c;
+  overflow: hidden;
+}
+
+.account-logo img,
+.account-logo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .money-block,

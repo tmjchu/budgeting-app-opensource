@@ -5,6 +5,8 @@ export type Account = {
   type?: string;
   subtype?: string;
   tracked: boolean;
+  institutionId?: string | null;
+  institutionName?: string | null;
 };
 
 export type BalanceSnapshot = {

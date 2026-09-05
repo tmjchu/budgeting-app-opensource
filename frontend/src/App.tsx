@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AccountLogo } from './components/AccountLogo';
 import openBudgetLogo from './assets/open-budget-logo.png';
 import { usePlaidLink } from './hooks/usePlaidLink';
 import { SetupScreen } from './components/SetupScreen';
@@ -935,7 +936,7 @@ function CompactAccountList({ accounts }: { accounts: Account[] }) {
     <div className="list-stack">
       {accounts.map((account) => (
         <div className="account-line" key={account.accountId}>
-          <span className="account-avatar">{account.name.charAt(0).toUpperCase()}</span>
+          <AccountLogo account={account} />
           <div>
             <strong>{account.name}</strong>
             <p>
@@ -996,7 +997,7 @@ function AccountBalanceList({ accounts, balances }: { accounts: Account[]; balan
 
         return (
           <div className="account-balance-line" key={account.accountId}>
-            <span className="account-avatar">{account.name.charAt(0).toUpperCase()}</span>
+            <AccountLogo account={account} />
             <div className="account-balance-details">
               <strong>{account.name}</strong>
               <p>

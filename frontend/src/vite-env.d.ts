@@ -11,7 +11,8 @@ type PlaidAccountMetadata = {
 type PlaidSuccessMetadata = {
   institution?: {
     name?: string;
-  };
+    institution_id?: string;
+  } | null;
   accounts: PlaidAccountMetadata[];
 };
 

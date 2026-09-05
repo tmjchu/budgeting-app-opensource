@@ -5,10 +5,10 @@ import com.localbudget.app.api.model.response.AccountResponse;
 import com.localbudget.app.api.model.response.LinkTokenResponse;
 import com.localbudget.app.converter.AccountConverter;
 import com.localbudget.app.domain.model.command.ExchangePlaidPublicTokenCommand;
-import com.localbudget.app.domain.processor.CreatePlaidLinkTokenProcessor;
-import com.localbudget.app.domain.service.AccountQueryService;
 import com.localbudget.app.domain.model.result.ExchangePlaidPublicTokenResult;
+import com.localbudget.app.domain.processor.CreatePlaidLinkTokenProcessor;
 import com.localbudget.app.domain.processor.ExchangePlaidPublicTokenProcessor;
+import com.localbudget.app.domain.service.AccountQueryService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +51,9 @@ public class PlaidLinkController {
                                 .toList());
         ExchangePlaidPublicTokenResult result = exchangePlaidPublicTokenProcessor.process(command);
         List<AccountResponse> response =
-                accountQueryService.enrich(result.trackedAccounts(), List.of(result.plaidItem())).stream()
+                accountQueryService
+                        .enrich(result.trackedAccounts(), List.of(result.plaidItem()))
+                        .stream()
                         .map(accountConverter::toResponse)
                         .toList();
         log.info("Exchange Public Token API Completed");

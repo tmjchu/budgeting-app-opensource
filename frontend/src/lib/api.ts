@@ -63,6 +63,7 @@ const liveApi = {
       body: JSON.stringify({
         publicToken,
         institutionName: metadata.institution?.name,
+        institutionId: metadata.institution?.institution_id,
         selectedAccounts: metadata.accounts.map((account) => ({
           accountId: account.id,
           name: account.name,
