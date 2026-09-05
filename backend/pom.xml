@@ -14,7 +14,7 @@
     <groupId>com.localbudget</groupId>
     <artifactId>local-budget-backend</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>local-budget-backend</name>
+    <name>Open Budget Backend</name>
     <description>Local-first budgeting app backend</description>
 
     <properties>

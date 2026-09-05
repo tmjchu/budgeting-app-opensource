@@ -82,6 +82,7 @@ class PlaidConnectionServiceTest {
                         new ExchangePlaidPublicTokenCommand(
                                 "public-token",
                                 "Test Bank",
+                                "ins-test",
                                 List.of(
                                         new SelectedAccountCommand(
                                                 "acc-1",
@@ -95,6 +96,7 @@ class PlaidConnectionServiceTest {
         ArgumentCaptor<PlaidItemCsvRecord> itemCaptor =
                 ArgumentCaptor.forClass(PlaidItemCsvRecord.class);
         verify(plaidItemRepository).upsert(itemCaptor.capture());
+        assertThat(itemCaptor.getValue().institutionId()).isEqualTo("ins-test");
         assertThat(itemCaptor.getValue().createdAt()).isEqualTo("2026-01-01T00:00:00Z");
         ArgumentCaptor<List<AccountCsvRecord>> accountCaptor = ArgumentCaptor.forClass(List.class);
         verify(accountRepository).upsertAll(accountCaptor.capture());

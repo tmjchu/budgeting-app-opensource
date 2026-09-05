@@ -1,8 +1,8 @@
-# Local Budget
+# Open Budget
 
 A local-first personal budgeting app with a Java Spring Boot backend, CSV persistence, Plaid integration, and a React/Vite dashboard for answering the ancient question: "Where did my money go this time?"
 
-![Local Budget dashboard with Plaid Link](docs/assets/local-budget-plaid-dashboard.png)
+![Open Budget dashboard with Plaid Link](docs/assets/local-budget-plaid-dashboard.png)
 
 ## Why I Built This
 
@@ -43,9 +43,27 @@ Backend:
 
 ```bash
 cd backend
-PLAID_CLIENT_ID=your_client_id
-PLAID_SECRET=your_secret
-PLAID_ENV=SANDBOX (or PLAID_ENV=PROD) 
+mvn spring-boot:run
+```
+
+Plaid environment variables are optional. Without them, the backend still starts and the
+frontend opens a first-run setup screen. Credentials entered there are validated with Plaid and
+saved under the configured data directory. Encryption is optional and off by default.
+
+Leave **Encrypt my local financial data** off to save credentials in plaintext `secrets.json`
+and keep CSV files unencrypted. No password is required, and the app is ready after restart.
+Enable it to encrypt credentials in `secrets.json.enc` and data in `.csv.enc` files. Only then
+are password and confirmation enabled and required. The password must contain at least 12
+characters; it is not saved and cannot be recovered. Use it to unlock after restarting.
+Encryption keeps timestamped backups of the original plaintext CSV files. Existing encrypted
+setups still require their original password; choosing plaintext during setup cannot downgrade them.
+Environment-provided credentials remain available as a development override and start the app in
+the ready state:
+
+```bash
+PLAID_CLIENT_ID=your_client_id \
+PLAID_SECRET=your_secret \
+PLAID_ENV=SANDBOX \
 mvn spring-boot:run
 ```
 
@@ -80,6 +98,10 @@ The backend writes local CSV data under `backend/data` by default:
 - `transactions.csv`
 - `balance_snapshots.csv`
 - `sync_runs.csv`
+- `secrets.json.enc` (created after UI credential setup)
+
+When local data encryption is enabled, each CSV is stored with an additional `.enc` suffix. The
+unencrypted source is retained as a timestamped `.bak-*` file during migration.
 
 Override the location with:
 

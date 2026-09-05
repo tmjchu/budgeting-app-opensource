@@ -4,9 +4,10 @@ import com.localbudget.app.config.BudgetAppProperties;
 import com.localbudget.app.converter.CategoryConverter;
 import com.localbudget.app.data.model.CategoryCsvRecord;
 import com.localbudget.app.domain.model.CategoryDefaults;
-import java.nio.file.Files;
+import com.localbudget.app.domain.service.CsvDataEncryptionService;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -32,8 +33,17 @@ public class CategoryCsvRepository extends CsvSupport {
         this.categoryConverter = categoryConverter;
     }
 
+    @Autowired
+    public CategoryCsvRepository(
+            BudgetAppProperties properties,
+            CategoryConverter categoryConverter,
+            CsvDataEncryptionService encryptionService) {
+        super(properties, encryptionService);
+        this.categoryConverter = categoryConverter;
+    }
+
     public List<CategoryCsvRecord> findAll() {
-        if (!Files.exists(path(FILE_NAME))) {
+        if (!exists(FILE_NAME)) {
             writeDefaults();
         }
 

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Local Budget is a local-first personal budgeting app. It has a Java 21 Spring Boot backend with local CSV persistence and Plaid integration, plus a React/Vite frontend dashboard.
+Open Budget is a local-first personal budgeting app. It has a Java 21 Spring Boot backend with local CSV persistence and Plaid integration, plus a React/Vite frontend dashboard.
 
 ## Repository Layout
 

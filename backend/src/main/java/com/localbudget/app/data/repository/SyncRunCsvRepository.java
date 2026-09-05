@@ -2,11 +2,13 @@ package com.localbudget.app.data.repository;
 
 import com.localbudget.app.config.BudgetAppProperties;
 import com.localbudget.app.data.model.SyncRunCsvRecord;
+import com.localbudget.app.domain.service.CsvDataEncryptionService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -26,6 +28,12 @@ public class SyncRunCsvRepository extends CsvSupport {
 
     public SyncRunCsvRepository(BudgetAppProperties properties) {
         super(properties);
+    }
+
+    @Autowired
+    public SyncRunCsvRepository(
+            BudgetAppProperties properties, CsvDataEncryptionService encryptionService) {
+        super(properties, encryptionService);
     }
 
     public List<SyncRunCsvRecord> findAll() {

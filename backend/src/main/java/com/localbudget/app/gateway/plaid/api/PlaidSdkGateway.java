@@ -1,12 +1,11 @@
 package com.localbudget.app.gateway.plaid.api;
 
-import static com.localbudget.app.config.BudgetAppProperties.Environment.PROD;
-
 import com.localbudget.app.config.BudgetAppProperties;
 import com.localbudget.app.domain.model.AccountDO;
+import com.localbudget.app.domain.model.PlaidCredentials;
 import com.localbudget.app.domain.model.PlaidItem;
+import com.localbudget.app.domain.service.PlaidCredentialsProvider;
 import com.localbudget.app.gateway.plaid.model.PlaidExchangeResult;
-import com.plaid.client.ApiClient;
 import com.plaid.client.model.AccountBase;
 import com.plaid.client.model.AccountsBalanceGetRequest;
 import com.plaid.client.model.AccountsBalanceGetRequestOptions;
@@ -28,7 +27,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.beans.InvalidPropertyException;
 import org.springframework.stereotype.Component;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -41,34 +39,27 @@ public class PlaidSdkGateway implements PlaidGateway {
     private static final String RANDOM_CLIENT_ID_PREFIX = "local-";
 
     private final BudgetAppProperties.PlaidConfig plaidConfig;
-    private final PlaidApi plaidApi;
+    private final PlaidCredentialsProvider credentialsProvider;
+    private final PlaidApiFactory apiFactory;
 
-    public PlaidSdkGateway(BudgetAppProperties properties) {
+    public PlaidSdkGateway(
+            BudgetAppProperties properties,
+            PlaidCredentialsProvider credentialsProvider,
+            PlaidApiFactory apiFactory) {
         this.plaidConfig = properties.plaid();
-        if (isBlank(plaidConfig.clientId()) || isBlank(plaidConfig.secret())) {
-            throw new InvalidPropertyException(
-                    this.getClass(),
-                    "plaidConfig",
-                    "PLAID_CLIENT_ID and PLAID_SECRET must be configured.");
-        }
-
-        ApiClient apiClient = new ApiClient();
-        if (plaidConfig.environment() == PROD) {
-            System.out.println("*** YOU ARE GETTING REAL DATA ***");
-            apiClient.setPlaidAdapter(ApiClient.Production);
-        } else {
-            apiClient.setPlaidAdapter(ApiClient.Sandbox);
-        }
-        this.plaidApi = apiClient.createService(PlaidApi.class);
+        this.credentialsProvider = credentialsProvider;
+        this.apiFactory = apiFactory;
     }
 
     @Override
     public LinkTokenCreateResponse createLinkToken() {
+        PlaidCredentials credentials = credentialsProvider.requireCredentials();
+        PlaidApi plaidApi = apiFactory.create(credentials);
 
         LinkTokenCreateRequest request =
                 new LinkTokenCreateRequest()
-                        .clientId(plaidConfig.clientId())
-                        .secret(plaidConfig.secret())
+                        .clientId(credentials.clientId())
+                        .secret(credentials.secret())
                         .clientName(plaidConfig.clientName())
                         .language(ENGLISH)
                         .countryCodes(toCountryCodes(plaidConfig.countryCodes()))
@@ -82,10 +73,12 @@ public class PlaidSdkGateway implements PlaidGateway {
 
     @Override
     public PlaidExchangeResult exchangePublicToken(String publicToken) {
+        PlaidCredentials credentials = credentialsProvider.requireCredentials();
+        PlaidApi plaidApi = apiFactory.create(credentials);
         ItemPublicTokenExchangeRequest request =
                 new ItemPublicTokenExchangeRequest()
-                        .clientId(plaidConfig.clientId())
-                        .secret(plaidConfig.secret())
+                        .clientId(credentials.clientId())
+                        .secret(credentials.secret())
                         .publicToken(publicToken);
 
         ItemPublicTokenExchangeResponse response =
@@ -99,6 +92,8 @@ public class PlaidSdkGateway implements PlaidGateway {
             List<AccountDO> trackedAccounts,
             LocalDate startDate,
             LocalDate endDate) {
+        PlaidCredentials credentials = credentialsProvider.requireCredentials();
+        PlaidApi plaidApi = apiFactory.create(credentials);
         List<String> accountIds = trackedAccounts.stream().map(AccountDO::accountId).toList();
         List<Transaction> transactions = new ArrayList<>();
         int total = Integer.MAX_VALUE;
@@ -107,8 +102,8 @@ public class PlaidSdkGateway implements PlaidGateway {
         while (offset < total) {
             TransactionsGetRequest request =
                     new TransactionsGetRequest()
-                            .clientId(plaidConfig.clientId())
-                            .secret(plaidConfig.secret())
+                            .clientId(credentials.clientId())
+                            .secret(credentials.secret())
                             .accessToken(plaidItem.accessToken())
                             .startDate(startDate)
                             .endDate(endDate)
@@ -130,11 +125,13 @@ public class PlaidSdkGateway implements PlaidGateway {
 
     @Override
     public List<AccountBase> fetchBalances(PlaidItem plaidItem, List<AccountDO> trackedAccounts) {
+        PlaidCredentials credentials = credentialsProvider.requireCredentials();
+        PlaidApi plaidApi = apiFactory.create(credentials);
         List<String> accountIds = trackedAccounts.stream().map(AccountDO::accountId).toList();
         AccountsBalanceGetRequest request =
                 new AccountsBalanceGetRequest()
-                        .clientId(plaidConfig.clientId())
-                        .secret(plaidConfig.secret())
+                        .clientId(credentials.clientId())
+                        .secret(credentials.secret())
                         .accessToken(plaidItem.accessToken())
                         .options(new AccountsBalanceGetRequestOptions().accountIds(accountIds));
 
@@ -155,10 +152,6 @@ public class PlaidSdkGateway implements PlaidGateway {
         } catch (IOException exception) {
             throw new IllegalStateException("Plaid request failed.", exception);
         }
-    }
-
-    private static boolean isBlank(String value) {
-        return value == null || value.isBlank();
     }
 
     private static List<Products> toProducts(List<String> products) {

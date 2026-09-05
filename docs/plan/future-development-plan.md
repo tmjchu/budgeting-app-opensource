@@ -1,10 +1,10 @@
 # Future Development Plan
 
-This document captures the long-term direction for Local Budget so future development can refer back to the intended product shape before adding features. The focus is to keep the app local-first, transparent, and practical while adding more of the categorization, budgeting, and transaction editing workflows commonly found in personal finance apps such as Rocket Money.
+This document captures the long-term direction for Open Budget so future development can refer back to the intended product shape before adding features. The focus is to keep the app local-first, transparent, and practical while adding more of the categorization, budgeting, and transaction editing workflows commonly found in personal finance apps such as Rocket Money.
 
 ## Product Direction
 
-Local Budget should evolve from a read-only spending dashboard into a lightweight personal budgeting tool where the user can correct, organize, and plan around their own financial data.
+Open Budget should evolve from a read-only spending dashboard into a lightweight personal budgeting tool where the user can correct, organize, and plan around their own financial data.
 
 The app should continue to prioritize:
 

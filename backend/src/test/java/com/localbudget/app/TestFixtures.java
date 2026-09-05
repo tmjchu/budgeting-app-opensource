@@ -22,7 +22,7 @@ public final class TestFixtures {
                         Environment.SANDBOX,
                         "client-id",
                         "secret",
-                        "Local Budget",
+                        "Open Budget",
                         List.of("transactions"),
                         List.of("US")));
     }
@@ -34,7 +34,7 @@ public final class TestFixtures {
 
     public static PlaidItem plaidItem() {
         return new PlaidItem(
-                "item-1", "access-token", "Test Bank", Instant.parse("2026-01-01T00:00:00Z"));
+                "item-1", "access-token", "Test Bank", Instant.parse("2026-01-01T00:00:00Z"), null);
     }
 
     public static TransactionDO transaction(

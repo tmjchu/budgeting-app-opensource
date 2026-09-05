@@ -2,11 +2,13 @@ package com.localbudget.app.data.repository;
 
 import com.localbudget.app.config.BudgetAppProperties;
 import com.localbudget.app.data.model.PlaidItemCsvRecord;
+import com.localbudget.app.domain.service.CsvDataEncryptionService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -14,11 +16,17 @@ public class PlaidItemCsvRepository extends CsvSupport {
 
     private static final String FILE_NAME = "plaid_items.csv";
     private static final String[] HEADERS = {
-        "plaid_item_id", "access_token", "institution_name", "created_at"
+        "plaid_item_id", "access_token", "institution_name", "created_at", "institution_id"
     };
 
     public PlaidItemCsvRepository(BudgetAppProperties properties) {
         super(properties);
+    }
+
+    @Autowired
+    public PlaidItemCsvRepository(
+            BudgetAppProperties properties, CsvDataEncryptionService encryptionService) {
+        super(properties, encryptionService);
     }
 
     public List<PlaidItemCsvRecord> findAll() {
@@ -29,7 +37,8 @@ public class PlaidItemCsvRepository extends CsvSupport {
                                         value(record, "plaid_item_id"),
                                         value(record, "access_token"),
                                         value(record, "institution_name"),
-                                        value(record, "created_at")))
+                                        value(record, "created_at"),
+                                        value(record, "institution_id")))
                 .toList();
     }
 
@@ -54,7 +63,8 @@ public class PlaidItemCsvRepository extends CsvSupport {
                                                 value(record.plaidItemId()),
                                                 value(record.accessToken()),
                                                 value(record.institutionName()),
-                                                value(record.createdAt())))
+                                                value(record.createdAt()),
+                                                value(record.institutionId())))
                         .toList());
     }
 }

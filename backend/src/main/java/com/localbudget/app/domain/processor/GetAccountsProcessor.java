@@ -1,7 +1,7 @@
 package com.localbudget.app.domain.processor;
 
-import com.localbudget.app.domain.model.AccountDO;
-import com.localbudget.app.domain.service.AccountService;
+import com.localbudget.app.domain.model.AccountView;
+import com.localbudget.app.domain.service.AccountQueryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GetAccountsProcessor {
 
-    private final AccountService accountService;
+    private final AccountQueryService accountService;
 
-    public List<AccountDO> process() {
+    public List<AccountView> process() {
         return accountService.findAll();
     }
 }

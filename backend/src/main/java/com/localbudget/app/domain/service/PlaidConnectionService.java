@@ -53,7 +53,8 @@ public class PlaidConnectionService {
                         exchangeResult.plaidItemId(),
                         exchangeResult.accessToken(),
                         command.institutionName(),
-                        Instant.now(clock));
+                        Instant.now(clock),
+                        command.institutionId());
         List<AccountDO> accounts =
                 command.selectedAccounts().stream()
                         .map(

@@ -2,12 +2,14 @@ package com.localbudget.app.data.repository;
 
 import com.localbudget.app.config.BudgetAppProperties;
 import com.localbudget.app.data.model.TransactionCsvRecord;
+import com.localbudget.app.domain.service.CsvDataEncryptionService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -36,6 +38,12 @@ public class TransactionCsvRepository extends CsvSupport {
 
     public TransactionCsvRepository(BudgetAppProperties properties) {
         super(properties);
+    }
+
+    @Autowired
+    public TransactionCsvRepository(
+            BudgetAppProperties properties, CsvDataEncryptionService encryptionService) {
+        super(properties, encryptionService);
     }
 
     public List<TransactionCsvRecord> findAll() {

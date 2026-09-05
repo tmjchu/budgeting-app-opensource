@@ -13,7 +13,8 @@ public class PlaidItemConverter {
                 plaidItemCsvRecord.plaidItemId(),
                 plaidItemCsvRecord.accessToken(),
                 plaidItemCsvRecord.institutionName(),
-                Instant.parse(plaidItemCsvRecord.createdAt()));
+                Instant.parse(plaidItemCsvRecord.createdAt()),
+                plaidItemCsvRecord.institutionId());
     }
 
     public PlaidItemCsvRecord toCsv(PlaidItem plaidItem) {
@@ -21,6 +22,7 @@ public class PlaidItemConverter {
                 plaidItem.plaidItemId(),
                 plaidItem.accessToken(),
                 plaidItem.institutionName(),
-                plaidItem.createdAt().toString());
+                plaidItem.createdAt().toString(),
+                plaidItem.institutionId());
     }
 }

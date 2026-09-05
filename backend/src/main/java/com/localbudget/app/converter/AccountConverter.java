@@ -4,6 +4,7 @@ import com.localbudget.app.api.model.request.SelectedAccountRequest;
 import com.localbudget.app.api.model.response.AccountResponse;
 import com.localbudget.app.data.model.AccountCsvRecord;
 import com.localbudget.app.domain.model.AccountDO;
+import com.localbudget.app.domain.model.AccountView;
 import com.localbudget.app.domain.model.command.SelectedAccountCommand;
 import org.springframework.stereotype.Component;
 
@@ -53,13 +54,16 @@ public class AccountConverter {
                 String.valueOf(account.tracked()));
     }
 
-    public AccountResponse toResponse(AccountDO account) {
+    public AccountResponse toResponse(AccountView view) {
+        AccountDO account = view.account();
         return new AccountResponse(
                 account.accountId(),
                 account.name(),
                 account.mask(),
                 account.type(),
                 account.subtype(),
-                account.tracked());
+                account.tracked(),
+                view.institutionId(),
+                view.institutionName());
     }
 }

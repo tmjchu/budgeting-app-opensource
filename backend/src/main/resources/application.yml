@@ -7,7 +7,7 @@ budget:
     environment: ${PLAID_ENV:sandbox}
     client-id: ${PLAID_CLIENT_ID:}
     secret: ${PLAID_SECRET:}
-    client-name: ${PLAID_CLIENT_NAME:Local Budget}
+    client-name: ${PLAID_CLIENT_NAME:Open Budget}
     products:
       - transactions
     country-codes:

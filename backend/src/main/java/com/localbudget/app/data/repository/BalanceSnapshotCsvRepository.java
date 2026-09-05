@@ -2,9 +2,11 @@ package com.localbudget.app.data.repository;
 
 import com.localbudget.app.config.BudgetAppProperties;
 import com.localbudget.app.data.model.BalanceSnapshotCsvRecord;
+import com.localbudget.app.domain.service.CsvDataEncryptionService;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -28,6 +30,12 @@ public class BalanceSnapshotCsvRepository extends CsvSupport {
 
     public BalanceSnapshotCsvRepository(BudgetAppProperties properties) {
         super(properties);
+    }
+
+    @Autowired
+    public BalanceSnapshotCsvRepository(
+            BudgetAppProperties properties, CsvDataEncryptionService encryptionService) {
+        super(properties, encryptionService);
     }
 
     public List<BalanceSnapshotCsvRecord> findAll() {
