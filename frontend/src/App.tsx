@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import openBudgetLogo from './assets/open-budget-logo.png';
 import { usePlaidLink } from './hooks/usePlaidLink';
+import { SetupScreen } from './components/SetupScreen';
+import { UnlockScreen } from './components/UnlockScreen';
 import { api, isMockMode } from './lib/api';
 import { formatCurrency, formatDateTime } from './lib/format';
 import type {
@@ -7,6 +10,7 @@ import type {
   BalanceSnapshot,
   CategoryStats,
   MonthlyStats,
+  SetupStatus,
   SyncResult,
   Transaction,
   TransactionQuery
@@ -143,6 +147,9 @@ function filterTransactions(
 }
 
 export function App() {
+  const [setupStatus, setSetupStatus] = useState<SetupStatus | null>(null);
+  const [setupError, setSetupError] = useState<string | null>(null);
+  const [isSetupLoading, setIsSetupLoading] = useState(true);
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [month, setMonth] = useState(currentMonth());
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -163,7 +170,22 @@ export function App() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  const loadSetupStatus = useCallback(async () => {
+    setIsSetupLoading(true);
+    setSetupError(null);
+    try {
+      setSetupStatus(await api.getSetupStatus());
+    } catch (caught) {
+      setSetupError(caught instanceof Error ? caught.message : 'Unable to reach the local backend.');
+    } finally {
+      setIsSetupLoading(false);
+    }
+  }, []);
+
   const loadDashboard = useCallback(async () => {
+    if (setupStatus?.state !== 'ready') {
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
@@ -184,9 +206,12 @@ export function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [month]);
+  }, [month, setupStatus?.state]);
 
   const loadExplorer = useCallback(async () => {
+    if (setupStatus?.state !== 'ready') {
+      return;
+    }
     setIsExplorerLoading(true);
     setError(null);
     try {
@@ -204,17 +229,25 @@ export function App() {
     } finally {
       setIsExplorerLoading(false);
     }
-  }, [accountFilter, categoryFilter, endDate, month, startDate]);
+  }, [accountFilter, categoryFilter, endDate, month, setupStatus?.state, startDate]);
 
   const { connect, isConnecting, error: plaidError } = usePlaidLink(loadDashboard);
 
   useEffect(() => {
-    void loadDashboard();
-  }, [loadDashboard]);
+    void loadSetupStatus();
+  }, [loadSetupStatus]);
 
   useEffect(() => {
-    void loadExplorer();
-  }, [loadExplorer]);
+    if (setupStatus?.state === 'ready') {
+      void loadDashboard();
+    }
+  }, [loadDashboard, setupStatus?.state]);
+
+  useEffect(() => {
+    if (setupStatus?.state === 'ready') {
+      void loadExplorer();
+    }
+  }, [loadExplorer, setupStatus?.state]);
 
   async function syncNow() {
     setIsSyncing(true);
@@ -228,6 +261,18 @@ export function App() {
       setError(caught instanceof Error ? caught.message : 'Unable to sync.');
     } finally {
       setIsSyncing(false);
+    }
+  }
+
+  async function lockNow() {
+    try {
+      setSetupStatus(await api.lock());
+      setAccounts([]);
+      setTransactions([]);
+      setExplorerTransactions([]);
+      setBalanceSnapshots([]);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to lock Open Budget.');
     }
   }
 
@@ -245,6 +290,47 @@ export function App() {
   );
   const activeError = error ?? plaidError;
 
+  if (isSetupLoading) {
+    return (
+      <main className="onboarding-shell">
+        <section className="onboarding-card unlock-card">
+          <div className="onboarding-brand">OB</div>
+          <p className="eyebrow">Open Budget</p>
+          <h1>Opening your local workspace…</h1>
+        </section>
+      </main>
+    );
+  }
+
+  if (setupError || !setupStatus) {
+    return (
+      <main className="onboarding-shell">
+        <section className="onboarding-card unlock-card">
+          <div className="onboarding-brand">OB</div>
+          <h1>Local backend unavailable</h1>
+          <p className="onboarding-copy">{setupError ?? 'Unable to read setup status.'}</p>
+          <button className="button primary onboarding-submit" onClick={() => void loadSetupStatus()}>
+            Try again
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  if (setupStatus.state === 'needs_setup') {
+    return (
+      <SetupScreen
+        onValidate={async (credentials) => (await api.validateCredentials(credentials)).message}
+        onConfigure={api.configureCredentials}
+        onConfigured={setSetupStatus}
+      />
+    );
+  }
+
+  if (setupStatus.state === 'locked') {
+    return <UnlockScreen onUnlock={api.unlock} onUnlocked={setSetupStatus} />;
+  }
+
   return (
     <main className="desktop-app">
       <Sidebar activeView={activeView} onChange={setActiveView} />
@@ -256,9 +342,11 @@ export function App() {
           isConnecting={isConnecting}
           isSyncing={isSyncing}
           isMockMode={isMockMode}
+          canLock={setupStatus.hasEncryptedSecrets && (!setupStatus.hasEnvironmentCredentials || setupStatus.csvEncryptionStatus === 'encrypted')}
           onMonthChange={setMonth}
           onConnect={isMockMode ? () => undefined : connect}
           onSync={syncNow}
+          onLock={lockNow}
         />
 
         {activeError && <div className="notice error">{activeError}</div>}
@@ -328,10 +416,9 @@ function Sidebar({ activeView, onChange }: { activeView: View; onChange: (view: 
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-mark">LB</div>
+        <img className="brand-mark" src={openBudgetLogo} alt="" width={46} height={46} />
         <div>
-          <strong>Local Budget</strong>
-          <span>Desktop finance</span>
+          <strong>Open Budget</strong>
         </div>
       </div>
       <nav className="nav-list" aria-label="Primary navigation">
@@ -346,10 +433,6 @@ function Sidebar({ activeView, onChange }: { activeView: View; onChange: (view: 
           </button>
         ))}
       </nav>
-      <div className="sidebar-footer">
-        <p>Local-first data</p>
-        <strong>No subscription dashboard for your subscription dashboard.</strong>
-      </div>
     </aside>
   );
 }
@@ -360,18 +443,22 @@ function Topbar({
   isConnecting,
   isSyncing,
   isMockMode,
+  canLock,
   onMonthChange,
   onConnect,
-  onSync
+  onSync,
+  onLock
 }: {
   activeView: View;
   month: string;
   isConnecting: boolean;
   isSyncing: boolean;
   isMockMode: boolean;
+  canLock: boolean;
   onMonthChange: (month: string) => void;
   onConnect: () => void;
   onSync: () => void;
+  onLock: () => void;
 }) {
   const title =
     activeView === 'dashboard'
@@ -402,6 +489,11 @@ function Topbar({
         <button className="button primary" onClick={onSync} disabled={isSyncing || isConnecting}>
           {isSyncing ? 'Syncing...' : 'Sync now'}
         </button>
+        {canLock && (
+          <button className="button secondary" onClick={onLock} disabled={isSyncing || isConnecting}>
+            Lock
+          </button>
+        )}
       </div>
     </header>
   );

@@ -1,4 +1,4 @@
-import type { Account, BalanceSnapshot, CategoryStats, MonthlyStats, SyncResult, Transaction, TransactionQuery } from './types';
+import type { Account, BalanceSnapshot, CategoryStats, ConfigureCredentialsInput, MonthlyStats, SetupStatus, SyncResult, Transaction, TransactionQuery } from './types';
 
 // Centralized sample content: edit this file to explore UI states without the backend.
 const now = new Date();
@@ -63,6 +63,11 @@ function categoriesFor(month: string): CategoryStats[] {
 const wait = <T>(value: T) => new Promise<T>((resolve) => window.setTimeout(() => resolve(value), 120));
 
 export const mockApi = {
+  getSetupStatus: async () => wait({ state: 'ready' as const, hasEncryptedSecrets: false, hasEnvironmentCredentials: false, csvEncryptionStatus: 'plaintext' as const }),
+  validateCredentials: async () => wait({ message: 'Plaid credentials are valid.' }),
+  configureCredentials: async (input: ConfigureCredentialsInput): Promise<SetupStatus> => wait({ state: 'ready', hasEncryptedSecrets: input.encryptCsvData, hasEnvironmentCredentials: false, csvEncryptionStatus: input.encryptCsvData ? 'encrypted' : 'plaintext' }),
+  unlock: async () => wait({ state: 'ready' as const, hasEncryptedSecrets: true, hasEnvironmentCredentials: false, csvEncryptionStatus: 'plaintext' as const }),
+  lock: async () => wait({ state: 'locked' as const, hasEncryptedSecrets: true, hasEnvironmentCredentials: false, csvEncryptionStatus: 'plaintext' as const }),
   createLinkToken: async () => wait({ linkToken: 'mock-link-token' }),
   exchangePublicToken: async () => wait(mockAccounts),
   sync: async (): Promise<SyncResult> => wait({ syncId: 'mock-sync', status: 'COMPLETED', startedAt: now.toISOString(), finishedAt: now.toISOString(), transactionsAdded: 2, transactionsUpdated: 1, balanceSnapshotsAdded: 3 }),

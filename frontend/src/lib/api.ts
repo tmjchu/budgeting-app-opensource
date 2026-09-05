@@ -3,6 +3,9 @@ import type {
   BalanceSnapshot,
   CategoryStats,
   MonthlyStats,
+  ConfigureCredentialsInput,
+  PlaidCredentialInput,
+  SetupStatus,
   SyncResult,
   Transaction,
   TransactionQuery
@@ -23,13 +26,36 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(text || `Request failed with ${response.status}`);
+    let message = text;
+    try {
+      message = (JSON.parse(text) as { message?: string }).message ?? text;
+    } catch {
+      // Keep non-JSON backend errors readable.
+    }
+    throw new Error(message || `Request failed with ${response.status}`);
   }
 
   return response.json() as Promise<T>;
 }
 
 const liveApi = {
+  getSetupStatus: async () => request<SetupStatus>('/api/setup/status'),
+  validateCredentials: async (credentials: PlaidCredentialInput) =>
+    request<{ message: string }>('/api/setup/validate', {
+      method: 'POST',
+      body: JSON.stringify(credentials)
+    }),
+  configureCredentials: async (credentials: ConfigureCredentialsInput) =>
+    request<SetupStatus>('/api/setup/credentials', {
+      method: 'POST',
+      body: JSON.stringify(credentials)
+    }),
+  unlock: async (password: string) =>
+    request<SetupStatus>('/api/setup/unlock', {
+      method: 'POST',
+      body: JSON.stringify({ password })
+    }),
+  lock: async () => request<SetupStatus>('/api/setup/lock', { method: 'POST' }),
   createLinkToken: async () => request<{ linkToken: string }>('/api/plaid/link-token', { method: 'POST' }),
   exchangePublicToken: async (publicToken: string, metadata: PlaidSuccessMetadata) =>
     request<Account[]>('/api/plaid/exchange-public-token', {

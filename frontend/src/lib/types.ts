@@ -64,3 +64,25 @@ export type TransactionQuery = {
   accountId?: string;
   category?: string;
 };
+
+export type SetupState = 'needs_setup' | 'locked' | 'ready';
+
+export type SetupStatus = {
+  state: SetupState;
+  hasEncryptedSecrets: boolean;
+  hasEnvironmentCredentials: boolean;
+  csvEncryptionStatus: 'plaintext' | 'encrypted';
+};
+
+export type PlaidEnvironment = 'SANDBOX' | 'PROD';
+
+export type PlaidCredentialInput = {
+  clientId: string;
+  secret: string;
+  environment: PlaidEnvironment;
+};
+
+export type ConfigureCredentialsInput = PlaidCredentialInput & {
+  password?: string;
+  encryptCsvData: boolean;
+};
