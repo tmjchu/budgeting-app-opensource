@@ -54,6 +54,14 @@ body {
   font-weight: 900;
 }
 
+.onboarding-logo {
+  display: block;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  object-fit: contain;
+}
+
 .onboarding-card h1 {
   margin: 6px 0 10px;
   font-size: clamp(1.7rem, 5vw, 2.3rem);
@@ -63,6 +71,69 @@ body {
   margin: 0 0 26px;
   color: #62666b;
   line-height: 1.55;
+}
+
+.plaid-inline-logo {
+  display: inline-block;
+  width: 58px;
+  height: 22px;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+.onboarding-form .sandbox-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sandbox-option span {
+  display: grid;
+  gap: 5px;
+}
+
+.sandbox-option small {
+  color: #62666b;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.onboarding-form .sandbox-option input {
+  appearance: none;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 24px;
+  min-height: 24px;
+  padding: 2px;
+  margin: 0;
+  border: 1px solid #9da3ab;
+  border-radius: 999px;
+  background: #d6d9dd;
+  cursor: pointer;
+}
+
+.sandbox-option input::before {
+  content: '';
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.onboarding-form .sandbox-option input:checked {
+  background: #3568ed;
+  border-color: #3568ed;
+}
+
+.sandbox-option input:checked::before {
+  transform: translateX(18px);
+}
+
+.sandbox-option input:focus-visible {
+  outline: 2px solid #3568ed;
+  outline-offset: 3px;
 }
 
 .onboarding-form {
@@ -151,8 +222,10 @@ body {
   font-weight: 800;
 }
 
-.onboarding-submit {
+.button.onboarding-submit,
+.setup-help-dialog a.button {
   min-height: 48px;
+  padding: 12px 20px;
   justify-content: center;
 }
 
@@ -256,15 +329,11 @@ h2 {
   text-align: left;
 }
 
-.nav-item span {
-  display: grid;
+.nav-icon {
+  display: block;
   width: 24px;
   height: 24px;
-  place-items: center;
-  border-radius: 6px;
-  background: #f1f1ef;
-  color: #626262;
-  font-size: 0.72rem;
+  flex-shrink: 0;
 }
 
 .nav-item.active {
@@ -1012,4 +1081,109 @@ h2 {
     right: 12px;
     bottom: 12px;
   }
+}
+
+.setup-help-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #315cc5;
+  text-align: left;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.setup-help-button > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 20px;
+  height: 20px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.setup-help-dialog {
+  width: min(560px, calc(100% - 32px));
+  max-height: calc(100dvh - 48px);
+  padding: 28px;
+  border: 1px solid #dededb;
+  border-radius: 18px;
+  color: #1f2428;
+  background: #fff;
+  box-shadow: 0 24px 70px rgb(25 28 31 / 24%);
+}
+
+.setup-help-dialog::backdrop {
+  background: rgb(25 28 31 / 45%);
+}
+
+.setup-help-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.setup-help-heading h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.setup-help-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: #f0f0ed;
+  color: inherit;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.setup-help-dialog p,
+.setup-help-dialog li {
+  color: #62666b;
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+
+.setup-help-dialog ol {
+  padding-left: 22px;
+  margin: 20px 0 24px;
+}
+
+.setup-help-dialog li + li {
+  margin-top: 14px;
+}
+
+.setup-help-dialog strong {
+  color: #31353a;
+}
+
+.setup-help-dialog a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

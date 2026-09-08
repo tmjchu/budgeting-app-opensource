@@ -1,43 +1,29 @@
-import { useState, type FormEvent } from 'react';
-import type { ConfigureCredentialsInput, PlaidCredentialInput, SetupStatus } from '../lib/types';
+import { useRef, useState, type FormEvent } from 'react';
+import openBudgetLogo from '../assets/open-budget-logo.png';
+import plaidLogo from '../assets/plaid-logo.svg';
+import type { ConfigureCredentialsInput, SetupStatus } from '../lib/types';
 
 type SetupScreenProps = {
-  onValidate: (credentials: PlaidCredentialInput) => Promise<string>;
   onConfigure: (credentials: ConfigureCredentialsInput) => Promise<SetupStatus>;
   onConfigured: (status: SetupStatus) => void;
 };
 
-export function SetupScreen({ onValidate, onConfigure, onConfigured }: SetupScreenProps) {
+export function SetupScreen({ onConfigure, onConfigured }: SetupScreenProps) {
+  const helpDialog = useRef<HTMLDialogElement>(null);
   const [clientId, setClientId] = useState('');
   const [secret, setSecret] = useState('');
-  const [environment, setEnvironment] = useState<'SANDBOX' | 'PROD'>('SANDBOX');
+  const [environment, setEnvironment] = useState<'SANDBOX' | 'PROD'>('PROD');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [encryptCsvData, setEncryptCsvData] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
 
   const credentials = { clientId: clientId.trim(), secret: secret.trim(), environment };
-
-  async function validate() {
-    setIsValidating(true);
-    setError(null);
-    setMessage(null);
-    try {
-      setMessage(await onValidate(credentials));
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to validate credentials.');
-    } finally {
-      setIsValidating(false);
-    }
-  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    setMessage(null);
     if (!credentials.clientId || !credentials.secret) {
       setError('Plaid client ID and secret are required.');
       return;
@@ -60,17 +46,39 @@ export function SetupScreen({ onValidate, onConfigure, onConfigured }: SetupScre
     }
   }
 
-  const busy = isSaving || isValidating;
+  const busy = isSaving;
 
   return (
     <main className="onboarding-shell">
       <section className="onboarding-card">
-        <div className="onboarding-brand">OB</div>
+        <img className="onboarding-logo" src={openBudgetLogo} alt="Open Budget" width={72} height={72} />
         <p className="eyebrow">First-run setup</p>
-        <h1>Connect Open Budget to Plaid</h1>
+        <h1>Setup your Open Budget</h1>
         <p className="onboarding-copy">
-          Your Plaid credentials and financial data stay on this Mac. Choose below whether to encrypt them with a password.
+          We use <img className="plaid-inline-logo" src={plaidLogo} alt="Plaid" /> to fetch your financial data through Open Banking.
+          {' '}Open Budget stores this data only on this computer.
         </p>
+        <button className="setup-help-button" type="button" aria-haspopup="dialog" onClick={() => helpDialog.current?.showModal()}>
+          <span aria-hidden="true">?</span> Need help getting your Plaid credentials?
+        </button>
+        <dialog className="setup-help-dialog" ref={helpDialog} aria-labelledby="plaid-help-title">
+          <div className="setup-help-heading">
+            <h2 id="plaid-help-title">Get your Plaid credentials</h2>
+            <button className="setup-help-close" type="button" aria-label="Close help" autoFocus onClick={() => helpDialog.current?.close()}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M4 4L12 12M12 4L4 12" />
+              </svg>
+            </button>
+          </div>
+          <p>You’ll need a Plaid developer account to connect your financial accounts to Open Budget.</p>
+          <ol>
+            <li><strong>Create an account.</strong> Open the Plaid Dashboard using the button below and choose the sign-up option. Already have an account? Sign in.</li>
+            <li><strong>Complete Plaid’s account setup.</strong> Verify your email and follow the dashboard prompts. To use real financial data, request Production access, including the Trial plan if available to you.</li>
+            <li><strong>Find your API keys.</strong> In the dashboard, open Developers → Keys. Copy your client ID and the secret for the environment you want to use.</li>
+            <li><strong>Return to Open Budget.</strong> Paste the client ID and secret into the fields below. Production is the default. If you’re using a Sandbox secret for test data, turn on Enable Sandbox. Click Save and continue to validate and save your credentials.</li>
+          </ol>
+          <a className="button primary" href="https://dashboard.plaid.com/signin" target="_blank" rel="noopener noreferrer">Open Plaid Dashboard <span className="visually-hidden">(opens in a new tab)</span><span aria-hidden="true">↗</span></a>
+        </dialog>
         <form className="onboarding-form" onSubmit={submit}>
           <label>
             Plaid client ID
@@ -80,19 +88,23 @@ export function SetupScreen({ onValidate, onConfigure, onConfigured }: SetupScre
             Plaid secret
             <input type="password" value={secret} onChange={(event) => setSecret(event.target.value)} autoComplete="off" />
           </label>
-          <label>
-            Plaid environment
-            <select value={environment} onChange={(event) => setEnvironment(event.target.value as 'SANDBOX' | 'PROD')}>
-              <option value="SANDBOX">Sandbox</option>
-              <option value="PROD">Production</option>
-            </select>
+          <label className="sandbox-option">
+            <span>
+              <strong>Enable Sandbox</strong>
+              <small>{environment === 'SANDBOX' ? 'Sandbox is on. Use test credentials and sample financial data.' : 'Production is on. Connect your real financial accounts.'}</small>
+            </span>
+            <input
+              type="checkbox"
+              role="switch"
+              aria-label="Enable Sandbox"
+              checked={environment === 'SANDBOX'}
+              disabled={busy}
+              onChange={(event) => {
+                setEnvironment(event.target.checked ? 'SANDBOX' : 'PROD');
+                setError(null);
+              }}
+            />
           </label>
-          <div className="onboarding-actions compact">
-            <button className="button secondary" type="button" onClick={validate} disabled={busy || !clientId || !secret}>
-              {isValidating ? 'Checking…' : 'Check credentials'}
-            </button>
-            {message && <span className="field-success">{message}</span>}
-          </div>
           <label className="encryption-option">
             <input
               type="checkbox"
@@ -108,23 +120,29 @@ export function SetupScreen({ onValidate, onConfigure, onConfigured }: SetupScre
               }}
             />
             <span>
-              <strong>Encrypt my local financial data</strong>
+              <strong>(Optional) Encrypt my local financial data</strong>
               <small>
-                Optional. When selected, your Plaid credentials and CSV files are encrypted with your password.
-                {' '}Leave it off to save credentials and CSV files unencrypted, without a password.
-                {' '}Enabling encryption retains existing CSV files as unencrypted recovery backups.
+                When selected, your Plaid credentials and financial data are encrypted with your password.
+                {' '}Leave it off to save credentials and financial data unencrypted.
+              </small>
+              <small>
+                (NOTE) We have no password recovery or reset process. If you forget your password, you won’t be able to decrypt your data.
               </small>
             </span>
           </label>
-          <label>
-            Encryption password
-            <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" disabled={!encryptCsvData || busy} required={encryptCsvData} minLength={12} />
-          </label>
-          <label>
-            Confirm password
-            <input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="new-password" disabled={!encryptCsvData || busy} required={encryptCsvData} />
-          </label>
-          {encryptCsvData && <p className="onboarding-copy">Use at least 12 characters. Your password is never saved and cannot be recovered.</p>}
+          {encryptCsvData && (
+            <>
+              <label>
+                Encryption password
+                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" disabled={busy} required minLength={12} />
+              </label>
+              <label>
+                Confirm password
+                <input type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="new-password" disabled={busy} required />
+              </label>
+              <p className="onboarding-copy">Use at least 12 characters. Your password is never saved and cannot be recovered.</p>
+            </>
+          )}
           {error && <div className="notice error">{error}</div>}
           <button className="button primary onboarding-submit" type="submit" disabled={busy}>
             {isSaving ? 'Saving setup…' : 'Save and continue'}

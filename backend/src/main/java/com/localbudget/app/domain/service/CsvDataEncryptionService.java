@@ -8,11 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
@@ -33,7 +31,6 @@ public class CsvDataEncryptionService {
     private final Path dataDirectory;
     private final CredentialCryptoService cryptoService;
     private final ObjectMapper objectMapper;
-    private final Clock clock;
     private volatile char[] sessionPassword;
     private volatile boolean enabled;
 
@@ -45,7 +42,6 @@ public class CsvDataEncryptionService {
         this.dataDirectory = properties.dataDirectory();
         this.cryptoService = cryptoService;
         this.objectMapper = objectMapper;
-        this.clock = clock;
         this.enabled = Files.exists(dataDirectory.resolve(MARKER)) || hasEncryptedFiles();
     }
 
@@ -129,12 +125,7 @@ public class CsvDataEncryptionService {
                 }
             }
 
-            String backupSuffix =
-                    ".bak-" + Instant.now(clock).toEpochMilli() + "-" + UUID.randomUUID();
             for (PendingEncryption item : pending) {
-                Path backup =
-                        item.plain().resolveSibling(item.plain().getFileName() + backupSuffix);
-                Files.copy(item.plain(), backup);
                 Files.move(
                         item.temporary(),
                         item.encrypted(),

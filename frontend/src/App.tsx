@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AccountLogo } from './components/AccountLogo';
 import openBudgetLogo from './assets/open-budget-logo.png';
+import dashboardIcon from './assets/navigation/dashboard.svg';
+import spendingIcon from './assets/navigation/spending.svg';
+import transactionsIcon from './assets/navigation/transactions.svg';
+import accountsIcon from './assets/navigation/accounts.svg';
 import { usePlaidLink } from './hooks/usePlaidLink';
 import { SetupScreen } from './components/SetupScreen';
 import { UnlockScreen } from './components/UnlockScreen';
@@ -321,7 +325,6 @@ export function App() {
   if (setupStatus.state === 'needs_setup') {
     return (
       <SetupScreen
-        onValidate={async (credentials) => (await api.validateCredentials(credentials)).message}
         onConfigure={api.configureCredentials}
         onConfigured={setSetupStatus}
       />
@@ -407,11 +410,11 @@ export function App() {
 }
 
 function Sidebar({ activeView, onChange }: { activeView: View; onChange: (view: View) => void }) {
-  const items: Array<{ view: View; label: string; mark: string }> = [
-    { view: 'dashboard', label: 'Dashboard', mark: 'D' },
-    { view: 'spending', label: 'Spending', mark: 'S' },
-    { view: 'transactions', label: 'Transactions', mark: 'T' },
-    { view: 'accounts', label: 'Accounts', mark: 'A' }
+  const items: Array<{ view: View; label: string; icon: string }> = [
+    { view: 'dashboard', label: 'Overview', icon: dashboardIcon },
+    { view: 'spending', label: 'Spending', icon: spendingIcon },
+    { view: 'transactions', label: 'Transactions', icon: transactionsIcon },
+    { view: 'accounts', label: 'Accounts', icon: accountsIcon }
   ];
 
   return (
@@ -429,7 +432,7 @@ function Sidebar({ activeView, onChange }: { activeView: View; onChange: (view: 
             key={item.view}
             onClick={() => onChange(item.view)}
           >
-            <span>{item.mark}</span>
+            <img className="nav-icon" src={item.icon} alt="" width={24} height={24} />
             {item.label}
           </button>
         ))}
@@ -463,9 +466,9 @@ function Topbar({
 }) {
   const title =
     activeView === 'dashboard'
-      ? 'Money Dashboard'
+      ? 'Overview'
       : activeView === 'spending'
-        ? 'Spending'
+        ? 'Spending Breakdowns'
         : activeView === 'transactions'
           ? 'Transactions'
           : 'Accounts';
@@ -478,7 +481,7 @@ function Topbar({
       </div>
       <div className="topbar-actions">
         <input
-          aria-label="Dashboard month"
+          aria-label="Overview month"
           className="control month-input"
           type="month"
           value={month}
