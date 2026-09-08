@@ -55,7 +55,7 @@ and keep CSV files unencrypted. No password is required, and the app is ready af
 Enable it to encrypt credentials in `secrets.json.enc` and data in `.csv.enc` files. Only then
 are password and confirmation enabled and required. The password must contain at least 12
 characters; it is not saved and cannot be recovered. Use it to unlock after restarting.
-Encryption keeps timestamped backups of the original plaintext CSV files. Existing encrypted
+Encryption verifies the encrypted data before removing the original plaintext files, without creating unencrypted backups. Existing encrypted
 setups still require their original password; choosing plaintext during setup cannot downgrade them.
 Environment-provided credentials remain available as a development override and start the app in
 the ready state:
@@ -101,7 +101,7 @@ The backend writes local CSV data under `backend/data` by default:
 - `secrets.json.enc` (created after UI credential setup)
 
 When local data encryption is enabled, each CSV is stored with an additional `.enc` suffix. The
-unencrypted source is retained as a timestamped `.bak-*` file during migration.
+unencrypted source is removed after its encrypted replacement has been verified. No unencrypted recovery backup is created.
 
 Override the location with:
 

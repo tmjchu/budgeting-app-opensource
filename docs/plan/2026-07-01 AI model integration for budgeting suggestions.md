@@ -92,7 +92,7 @@ Add an "AI Insights" area to the app with three clear states:
 Use clear wording like:
 
 ```text
-AI insights are optional. If you enable this feature, Local Budget will send selected banking history and financial summaries from this app to the AI provider and model you configure. This may include transaction dates, amounts, merchant names, categories, account names or types, balances, and spending summaries.
+AI insights are optional. If you enable this feature, Open Budget will send selected banking history and financial summaries from this app to the AI provider and model you configure. This may include transaction dates, amounts, merchant names, categories, account names or types, balances, and spending summaries.
 
 Your AI provider may process, store, or use this data according to its own terms and privacy policy. Review your provider's policies before continuing.
 
