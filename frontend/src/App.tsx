@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AccountLogo } from './components/AccountLogo';
+import { categoryIcon } from './lib/categoryIcons';
 import openBudgetLogo from './assets/open-budget-logo.png';
 import dashboardIcon from './assets/navigation/dashboard.svg';
 import spendingIcon from './assets/navigation/spending.svg';
@@ -69,10 +70,6 @@ function categoryColor(category: string) {
     hash = category.charCodeAt(index) + ((hash << 5) - hash);
   }
   return CATEGORY_COLORS[Math.abs(hash) % CATEGORY_COLORS.length];
-}
-
-function categoryInitial(category: string) {
-  return category.replace(/[^a-zA-Z0-9]/g, '').charAt(0).toUpperCase() || '$';
 }
 
 function spendTransactions(transactions: Transaction[]) {
@@ -254,8 +251,15 @@ export function App() {
     }
   }, [loadExplorer, setupStatus?.state]);
 
+  useEffect(() => {
+    if (!lastSync) return;
+    const timeout = window.setTimeout(() => setLastSync(null), 5000);
+    return () => window.clearTimeout(timeout);
+  }, [lastSync]);
+
   async function syncNow() {
     setIsSyncing(true);
+    setLastSync(null);
     setError(null);
     try {
       const result = await api.sync();
@@ -339,7 +343,7 @@ export function App() {
     <main className="desktop-app">
       <Sidebar activeView={activeView} onChange={setActiveView} />
       <section className="workspace">
-        {isMockMode && <div className="mock-ribbon">UI mock · sample data</div>}
+        {isMockMode && <div className="mock-ribbon">Preview with sample data</div>}
         <Topbar
           activeView={activeView}
           month={month}
@@ -354,12 +358,19 @@ export function App() {
         />
 
         {activeError && <div className="notice error">{activeError}</div>}
-        {lastSync && (
-          <div className="notice">
-            Sync complete: {lastSync.transactionsAdded} added, {lastSync.transactionsUpdated} updated,{' '}
-            {lastSync.balanceSnapshotsAdded} balance snapshots.
-          </div>
-        )}
+        <div className="toast-region" role="status" aria-live="polite" aria-atomic="true">
+          {lastSync && (
+            <div className="sync-toast">
+              <span>
+                <strong>Sync complete</strong>: {lastSync.transactionsAdded} added, {lastSync.transactionsUpdated} updated,{' '}
+                {lastSync.balanceSnapshotsAdded} balance snapshots.
+              </span>
+              <button type="button" className="toast-dismiss" aria-label="Dismiss sync notification" onClick={() => setLastSync(null)}>
+                ×
+              </button>
+            </div>
+          )}
+        </div>
 
         {activeView === 'dashboard' && (
           <DashboardView
@@ -367,6 +378,7 @@ export function App() {
             transactions={transactions}
             accounts={accounts}
             balances={latestBalances}
+            onNavigate={setActiveView}
             isLoading={isLoading}
           />
         )}
@@ -423,6 +435,7 @@ function Sidebar({ activeView, onChange }: { activeView: View; onChange: (view: 
         <img className="brand-mark" src={openBudgetLogo} alt="" width={46} height={46} />
         <div>
           <strong>Open Budget</strong>
+          <span>Your money, in view</span>
         </div>
       </div>
       <nav className="nav-list" aria-label="Primary navigation">
@@ -430,6 +443,7 @@ function Sidebar({ activeView, onChange }: { activeView: View; onChange: (view: 
           <button
             className={activeView === item.view ? 'nav-item active' : 'nav-item'}
             key={item.view}
+            aria-current={activeView === item.view ? 'page' : undefined}
             onClick={() => onChange(item.view)}
           >
             <img className="nav-icon" src={item.icon} alt="" width={24} height={24} />
@@ -437,6 +451,9 @@ function Sidebar({ activeView, onChange }: { activeView: View; onChange: (view: 
           </button>
         ))}
       </nav>
+      <a className="icon-credits-link" href={`${import.meta.env.BASE_URL}icon-credits.html`} target="_blank" rel="noopener noreferrer">
+        Icon credits
+      </a>
     </aside>
   );
 }
@@ -468,7 +485,7 @@ function Topbar({
     activeView === 'dashboard'
       ? 'Overview'
       : activeView === 'spending'
-        ? 'Spending Breakdowns'
+        ? 'Spending'
         : activeView === 'transactions'
           ? 'Transactions'
           : 'Accounts';
@@ -476,20 +493,22 @@ function Topbar({
   return (
     <header className="topbar">
       <div>
-        <p className="eyebrow">{monthLabel(month)}</p>
         <h1>{title}</h1>
+        <p className="view-description">{activeView === 'dashboard' ? 'A clear picture of your money this month.' : activeView === 'spending' ? 'See where your money goes.' : activeView === 'transactions' ? 'Find and review your account activity.' : 'Your connected accounts and latest balances.'}</p>
       </div>
       <div className="topbar-actions">
         <input
-          aria-label="Overview month"
+          aria-label="Reporting month"
           className="control month-input"
           type="month"
           value={month}
           onChange={(event) => onMonthChange(event.target.value)}
         />
-        <button className="button secondary" onClick={onConnect} disabled={isMockMode || isConnecting || isSyncing}>
-          {isMockMode ? 'Demo accounts' : isConnecting ? 'Connecting...' : 'Connect account'}
-        </button>
+        {activeView === 'accounts' && (
+          <button className="button secondary" onClick={onConnect} disabled={isMockMode || isConnecting || isSyncing}>
+            {isMockMode ? 'Demo accounts' : isConnecting ? 'Connecting...' : 'Connect account'}
+          </button>
+        )}
         <button className="button primary" onClick={onSync} disabled={isSyncing || isConnecting}>
           {isSyncing ? 'Syncing...' : 'Sync now'}
         </button>
@@ -508,12 +527,14 @@ function DashboardView({
   transactions,
   accounts,
   balances,
+  onNavigate,
   isLoading
 }: {
   stats: MonthlyStats | null;
   transactions: Transaction[];
   accounts: Account[];
   balances: BalanceSnapshot[];
+  onNavigate: (view: View) => void;
   isLoading: boolean;
 }) {
   const recentGroups = groupTransactionsByDate(transactions.slice(0, 8));
@@ -523,7 +544,7 @@ function DashboardView({
       <div className="metric-strip">
         <MetricTile label="Current spend" value={formatCurrency(stats?.spending ?? 0)} tone="spend" />
         <MetricTile label="Income" value={formatCurrency(stats?.income ?? 0)} tone="income" />
-        <MetricTile label="Net cash flow" value={formatCurrency(stats?.netCashFlow ?? 0)} tone="cash" />
+        <MetricTile label="Net cash flow" value={formatCurrency(stats?.netCashFlow ?? 0)} tone={(stats?.netCashFlow ?? 0) < 0 ? 'negative' : 'cash'} />
         <MetricTile label="Transactions" value={new Intl.NumberFormat().format(stats?.transactionCount ?? 0)} />
       </div>
 
@@ -531,7 +552,7 @@ function DashboardView({
         <section className="card tall-card">
           <div className="section-heading">
             <h2>Recent transactions</h2>
-            <span>{transactions.length}</span>
+            <button className="text-button" onClick={() => onNavigate('transactions')}>View all</button>
           </div>
           <GroupedTransactions groups={recentGroups} limit={8} />
         </section>
@@ -539,10 +560,10 @@ function DashboardView({
         <section className="card tall-card">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Latest balances</p>
               <h2>Accounts</h2>
+              <p className="section-description">Latest balances</p>
             </div>
-            <span>{accounts.length}</span>
+            <button className="text-button" onClick={() => onNavigate('accounts')}>Manage</button>
           </div>
           <AccountBalanceList accounts={accounts} balances={balances} />
         </section>
@@ -571,7 +592,7 @@ function SpendingView({
   return (
     <div className="view-stack">
       <div className="segmented-toolbar">
-        <button onClick={() => onMonthChange(previousMonth(currentMonth()))}>Last month</button>
+        <button className={month === previousMonth(currentMonth()) ? 'selected' : ''} onClick={() => onMonthChange(previousMonth(currentMonth()))}>Last month</button>
         <button className={month === currentMonth() ? 'selected' : ''} onClick={() => onMonthChange(currentMonth())}>
           This month
         </button>
@@ -585,11 +606,12 @@ function SpendingView({
       </div>
 
       <div className="spending-layout">
-        <section className="card">
+        <div className="spending-main">
+        <section className="card spending-breakdown">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Spending breakdown</p>
-              <h2>{monthLabel(month)}</h2>
+              <h2 className="spending-title">Spending breakdown</h2>
+              <p className="section-description">{monthLabel(month)}</p>
             </div>
             <strong>{formatCurrency(spend)}</strong>
           </div>
@@ -599,10 +621,11 @@ function SpendingView({
           </div>
         </section>
 
+        <LargestPurchases transactions={largest} />
+        </div>
         <aside className="insight-column">
           <SummaryCard stats={stats} />
           <InsightList title="Frequent spend" items={frequent} />
-          <LargestPurchases transactions={largest} />
         </aside>
       </div>
     </div>
@@ -723,7 +746,7 @@ function TransactionsView({
         <div className="section-heading">
           <div>
             <p className="eyebrow">Transaction explorer</p>
-            <h2>{transactions.length} results</h2>
+            <h2>{transactions.length} {transactions.length === 1 ? 'result' : 'results'}</h2>
           </div>
           {isLoading && <span>Loading</span>}
         </div>
@@ -783,27 +806,43 @@ function MetricTile({ label, value, tone = 'neutral' }: { label: string; value: 
 function CategoryChip({ category }: { category: string }) {
   return (
     <span className="category-chip">
-      <span style={{ background: categoryColor(category) }}>{categoryInitial(category)}</span>
+      <span style={{ background: `color-mix(in srgb, ${categoryColor(category)} 70%, white)` }}>
+        <img src={categoryIcon(category)} alt="" width={19} height={19} />
+      </span>
       {category}
     </span>
   );
 }
 
 function DonutChart({ categories, total }: { categories: CategoryStats[]; total: number }) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [focused, setFocused] = useState<string | null>(null);
+  const activeCategory = categories.find((category) => category.category === (hovered ?? focused));
   let offset = 25;
   const radius = 72;
   const circumference = 2 * Math.PI * radius;
 
   return (
     <div className="donut-wrap">
-      <svg viewBox="0 0 200 200" role="img" aria-label="Category spending distribution">
+      <svg viewBox="0 0 200 200" role="group" aria-label="Category spending distribution">
         <circle className="donut-base" cx="100" cy="100" r={radius} />
         {categories.map((category) => {
           const share = total === 0 ? 0 : category.amount / total;
           const dash = share * circumference;
           const circle = (
             <circle
-              className="donut-segment"
+              className={activeCategory?.category === category.category ? 'donut-segment highlighted' : 'donut-segment'}
+              tabIndex={share > 0 ? 0 : -1}
+              role="img"
+              aria-label={`${category.category}: ${formatCurrency(category.amount)}`}
+              onMouseEnter={() => setHovered(category.category)}
+              onMouseLeave={() => setHovered(null)}
+              onFocus={() => { setHovered(null); setFocused(category.category); }}
+              onBlur={() => setFocused(null)}
+              onClick={() => setFocused(category.category)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') { setHovered(null); setFocused(null); }
+              }}
               cx="100"
               cy="100"
               key={category.category}
@@ -817,9 +856,9 @@ function DonutChart({ categories, total }: { categories: CategoryStats[]; total:
           return circle;
         })}
       </svg>
-      <div className="donut-center">
-        <span>Total spend</span>
-        <strong>{formatCurrency(total)}</strong>
+      <div className="donut-center" role="status" aria-live="polite" aria-atomic="true">
+        <span>{activeCategory?.category ?? 'Total spend'}</span>
+        <strong>{formatCurrency(activeCategory?.amount ?? total)}</strong>
       </div>
     </div>
   );
@@ -862,7 +901,7 @@ function SummaryCard({ stats }: { stats: MonthlyStats | null }) {
       <div className="summary-list">
         <SummaryRow label="Income" value={formatCurrency(stats?.income ?? 0)} tone="positive" />
         <SummaryRow label="Spending" value={formatCurrency(stats?.spending ?? 0)} />
-        <SummaryRow label="Net cash flow" value={formatCurrency(stats?.netCashFlow ?? 0)} tone="positive" />
+        <SummaryRow label="Net cash flow" value={formatCurrency(stats?.netCashFlow ?? 0)} tone={(stats?.netCashFlow ?? 0) < 0 ? 'negative' : 'positive'} />
         <SummaryRow label="Transactions" value={new Intl.NumberFormat().format(stats?.transactionCount ?? 0)} />
       </div>
     </section>
@@ -906,7 +945,7 @@ function InsightList({ title, items }: { title: string; items: Array<{ name: str
 
 function LargestPurchases({ transactions }: { transactions: Transaction[] }) {
   return (
-    <section className="card compact-card">
+    <section className="card largest-purchases">
       <div className="section-heading">
         <h2>Largest purchases</h2>
       </div>
@@ -1079,23 +1118,20 @@ function TransactionGrid({ transactions }: { transactions: Transaction[] }) {
       <div className="table-header">
         <span>Date</span>
         <span>Name</span>
-        <span>Account</span>
         <span>Category</span>
-        <span>Status</span>
-        <span>Payment</span>
-        <span>Amount</span>
+        <span className="amount-cell">Amount</span>
       </div>
       {transactions.map((transaction) => (
         <div className="table-row" key={transaction.transactionId}>
           <span>{shortDate(transaction.date)}</span>
-          <span>
-            <strong>{displayName(transaction)}</strong>
-            <p>{transaction.name}</p>
-          </span>
-          <span>{transaction.accountName}</span>
+          <div className="transaction-details">
+            <div className="transaction-name">
+              <strong>{displayName(transaction)}</strong>
+              {transaction.pending && <span className="transaction-pending">(Pending)</span>}
+            </div>
+            <p>{transaction.accountName}</p>
+          </div>
           <CategoryChip category={transaction.category} />
-          <span>{transaction.pending ? 'Pending' : transaction.excluded ? 'Excluded' : 'Posted'}</span>
-          <span>{transaction.paymentChannel ?? 'Unknown'}</span>
           <strong className={transaction.amount < 0 ? 'positive-amount amount-cell' : 'amount-cell'}>
             {formatCurrency(transaction.amount)}
           </strong>

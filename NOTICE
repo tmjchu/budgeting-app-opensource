@@ -8,3 +8,16 @@ under the MIT license reproduced in frontend/src/assets/institutions/LICENSE.
 Bank names and marks belong to their respective owners; inclusion identifies
 account institutions and does not imply endorsement. See the asset README
 for pinned sources and the scope of the upstream license.
+
+Adapted category icons are distributed with their own source license terms.
+Cash Money Finance and Food Dinner Fork Spoon Knife by wishforge.games,
+and Health Care Love by erix subyarko, are listed as CC Attribution by SVG Repo
+(version unspecified). Savings by Microsoft and File Unknown by Ant Design
+are MIT-licensed. The other four uploaded category icons are listed as CC0
+or Public Domain. Colors, dimensions, outline weights, and SVG formatting
+were adapted for Open Budget.
+Exact source URLs, credits, license links, modifications, and remaining
+provenance limitations are recorded in frontend/src/assets/categories/README.md
+and frontend/src/assets/categories/sources.json.
+The production app includes frontend/public/icon-credits.html and the full
+Microsoft and Ant Design MIT notices in frontend/public/licenses/.

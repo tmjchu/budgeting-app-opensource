@@ -20,14 +20,13 @@ export function TransactionTable({ transactions }: Props) {
               <th>Name</th>
               <th>Account</th>
               <th>Category</th>
-              <th>Status</th>
               <th className="amount-column">Amount</th>
             </tr>
           </thead>
           <tbody>
             {transactions.length === 0 ? (
               <tr>
-                <td colSpan={6} className="empty-row">
+                <td colSpan={5} className="empty-row">
                   No transactions for this month.
                 </td>
               </tr>
@@ -36,12 +35,13 @@ export function TransactionTable({ transactions }: Props) {
                 <tr key={transaction.transactionId}>
                   <td>{transaction.date}</td>
                   <td>
-                    <strong>{transaction.merchantName ?? transaction.name}</strong>
-                    <p>{transaction.name}</p>
+                    <span className="transaction-name">
+                      <strong>{transaction.merchantName ?? transaction.name}</strong>
+                      {transaction.pending && <span className="transaction-pending">(Pending)</span>}
+                    </span>
                   </td>
                   <td>{transaction.accountName}</td>
                   <td>{transaction.category}</td>
-                  <td>{transaction.pending ? 'Pending' : transaction.excluded ? 'Excluded' : 'Posted'}</td>
                   <td className="amount-column">{formatCurrency(transaction.amount)}</td>
                 </tr>
               ))
