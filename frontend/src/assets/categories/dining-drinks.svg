@@ -1,0 +1,15 @@
+<!--
+Food Dinner Fork Spoon Knife - Author: wishforge.games
+Source: https://www.svgrepo.com/svg/383685/food-dinner-fork-spoon-knife
+Original download: https://www.svgrepo.com/download/383685/food-dinner-fork-spoon-knife.svg
+License listed by source: CC Attribution (version not specified)
+License information: https://www.svgrepo.com/page/licensing/#CC%20Attribution
+Changes by Open Budget: Recolored to #263344; resized to 24px; adjusted outline weight and rounded joins; simplified SVG metadata/styles. Some viewBoxes padded to prevent clipping. Original shape geometry retained.
+Verified: 2026-09-08 (live source page; original download metadata).
+See README.md and ../../../public/icon-credits.html for credits and notices.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#263344" stroke-width="2.2667" stroke-linecap="round" stroke-linejoin="round"><path d="M19,10c0-2.8-2.2-5-5-5v12v4v6.1c0,1,0.8,1.9,1.9,1.9h0c1.1,0,2-1,1.9-2.1l-0.5-5c-0.1-1.3,0.6-2.5,1.8-2.9h0  V10z" />
+<path d="M26.7,17.7c-0.1-1.3,0.3-2.6,1.2-3.5c0.7-0.7,1.1-2,1.1-3.7c0-3-1.3-5.5-3-5.5s-3,2.4-3,5.5  c0,1.7,0.4,2.9,1.1,3.7c0.9,1,1.3,2.2,1.2,3.5l-1,9.3c-0.1,1,0.7,2,1.7,2c1.1,0,1.9-0.9,1.7-2L26.7,17.7z" />
+<path d="M3,5v5.5c0,1.7,0.4,2.9,1.1,3.7c0.9,1,1.3,2.2,1.2,3.5l-1,9.3c-0.1,1,0.7,2,1.7,2c1.1,0,1.9-0.9,1.7-2l-1-9.3  c-0.1-1.3,0.3-2.6,1.2-3.5c0.7-0.7,1.1-2,1.1-3.7V5" />
+<line x1="6" y1="11" x2="6" y2="5" />
+</svg>
