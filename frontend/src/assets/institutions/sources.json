@@ -1,0 +1,72 @@
+[
+  {
+    "key": "capital-one",
+    "page": "https://commons.wikimedia.org/wiki/File:Capital_One_logo.svg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Capital_One_logo.svg",
+    "institution": "Capital One",
+    "copyrightStatus": "Public domain (PD-textlogo), as labeled by Wikimedia Commons; trademark rights retained",
+    "downloaded": "2026-09-09",
+    "modifications": "None",
+    "sha256": "69d918170633be70ec4c0fd57f421ad7b70c59641580a0ee77e929964a157c96"
+  },
+  {
+    "key": "bilt",
+    "page": "https://commons.wikimedia.org/wiki/File:Bilt_Rewards_logo.svg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/e/e2/Bilt_Rewards_logo.svg",
+    "institution": "Bilt Rewards",
+    "copyrightStatus": "Public domain (PD-textlogo), as labeled by Wikimedia Commons; trademark rights retained",
+    "downloaded": "2026-09-09",
+    "modifications": "None",
+    "sha256": "b4255c2860e09a233d087a475333fe3290afbb452e9862aef4b8a1d6ecff1613"
+  },
+  {
+    "key": "goldman-sachs",
+    "page": "https://commons.wikimedia.org/wiki/File:Goldman_Sachs_logo.svg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Goldman_Sachs_logo.svg",
+    "institution": "Goldman Sachs",
+    "copyrightStatus": "Public domain (PD-textlogo), as labeled by Wikimedia Commons; trademark rights retained",
+    "downloaded": "2026-09-09",
+    "modifications": "None",
+    "sha256": "2f2195e8160285319f742ce8ff81a61269c02a63427da7c3905fe244dfaa8d07"
+  },
+  {
+    "key": "pnc",
+    "page": "https://commons.wikimedia.org/wiki/File:PNClogo.svg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/PNClogo.svg",
+    "institution": "PNC",
+    "copyrightStatus": "Public domain (PD-textlogo), as labeled by Wikimedia Commons; trademark rights retained",
+    "downloaded": "2026-09-09",
+    "modifications": "None",
+    "sha256": "de051e12faa2a1f82baafd0407b34eb06411e13a834f894baa64b76ce67eb5e7"
+  },
+  {
+    "key": "bny",
+    "page": "https://commons.wikimedia.org/wiki/File:BNY_logo_2024.svg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/BNY_logo_2024.svg",
+    "institution": "BNY",
+    "copyrightStatus": "Public domain (PD-textlogo), as labeled by Wikimedia Commons; trademark rights retained",
+    "downloaded": "2026-09-09",
+    "modifications": "None",
+    "sha256": "28fa96e0d2dfc4b680aabc09b928dbe38d066141543a948ed808c5277e2d37ee"
+  },
+  {
+    "key": "us-bank",
+    "page": "https://commons.wikimedia.org/wiki/File:US_Bancorp_logo_2023_color.svg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/8/8b/US_Bancorp_logo_2023_color.svg",
+    "institution": "U.S. Bank",
+    "copyrightStatus": "Public domain (PD-textlogo), as labeled by Wikimedia Commons; trademark rights retained",
+    "downloaded": "2026-09-09",
+    "modifications": "None",
+    "sha256": "8c836cb88ab82e90da26d1b4e2b3603ecc3377daa7f2217a9fbb1605f03e59d5"
+  },
+  {
+    "key": "truist",
+    "page": "https://commons.wikimedia.org/wiki/File:Truist_Financial_logo.svg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Truist_Financial_logo.svg",
+    "institution": "Truist",
+    "copyrightStatus": "Public domain (PD-textlogo), as labeled by Wikimedia Commons; trademark rights retained",
+    "downloaded": "2026-09-09",
+    "modifications": "None",
+    "sha256": "3c83ddfab516508483cbba41b0944bc618f2ac4d742473b66bb2e3b3e507e0c2"
+  }
+]

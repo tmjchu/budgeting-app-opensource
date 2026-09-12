@@ -10,7 +10,7 @@ import { usePlaidLink } from './hooks/usePlaidLink';
 import { SetupScreen } from './components/SetupScreen';
 import { UnlockScreen } from './components/UnlockScreen';
 import { api, isMockMode } from './lib/api';
-import { formatCurrency, formatDateTime } from './lib/format';
+import { formatCurrency } from './lib/format';
 import type {
   Account,
   BalanceSnapshot,
@@ -768,29 +768,16 @@ function AccountsView({
   const snapshotCount = snapshots.length;
 
   return (
-    <div className="accounts-layout">
-      <section className="card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Tracked accounts</p>
-            <h2>{accounts.length} accounts</h2>
-          </div>
-          <span>{snapshotCount} snapshots</span>
+    <section className="card">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Latest balances</p>
+          <h2>{accounts.length} accounts</h2>
         </div>
-        <CompactAccountList accounts={accounts} />
-      </section>
-
-      <section className="card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Latest sync</p>
-            <h2>Balances</h2>
-          </div>
-          <span>{balances.length}</span>
-        </div>
-        <BalanceList balances={balances} />
-      </section>
-    </div>
+        <span>{snapshotCount} snapshots</span>
+      </div>
+      <AccountBalanceList accounts={accounts} balances={balances} showTrackingStatus />
+    </section>
   );
 }
 
@@ -969,54 +956,11 @@ function LargestPurchases({ transactions }: { transactions: Transaction[] }) {
   );
 }
 
-function CompactAccountList({ accounts }: { accounts: Account[] }) {
-  if (accounts.length === 0) {
-    return <p className="empty-state">Connect an account to start tracking local budget data.</p>;
-  }
-
-  return (
-    <div className="list-stack">
-      {accounts.map((account) => (
-        <div className="account-line" key={account.accountId}>
-          <AccountLogo account={account} />
-          <div>
-            <strong>{account.name}</strong>
-            <p>
-              {account.subtype ?? account.type ?? 'Account'}
-              {account.mask ? ` • ${account.mask}` : ''}
-            </p>
-          </div>
-          <span className={account.tracked ? 'status-pill tracked' : 'status-pill'}>{account.tracked ? 'Tracked' : 'Hidden'}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function BalanceList({ balances }: { balances: BalanceSnapshot[] }) {
-  if (balances.length === 0) {
-    return <p className="empty-state">No balance snapshots yet.</p>;
-  }
-
-  return (
-    <div className="list-stack">
-      {balances.map((balance) => (
-        <div className="balance-line" key={balance.snapshotId}>
-          <div>
-            <strong>{balance.accountName}</strong>
-            <p>{formatDateTime(balance.syncedAt)}</p>
-          </div>
-          <div className="money-block">
-            <strong>{formatCurrency(balance.currentBalance ?? 0)}</strong>
-            <p>Available {formatCurrency(balance.availableBalance ?? 0)}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function AccountBalanceList({ accounts, balances }: { accounts: Account[]; balances: BalanceSnapshot[] }) {
+function AccountBalanceList({ accounts, balances, showTrackingStatus = false }: {
+  accounts: Account[];
+  balances: BalanceSnapshot[];
+  showTrackingStatus?: boolean;
+}) {
   if (accounts.length === 0) {
     return <p className="empty-state">Connect an account to start tracking local budget data.</p>;
   }
@@ -1024,7 +968,7 @@ function AccountBalanceList({ accounts, balances }: { accounts: Account[]; balan
   const balanceByAccount = new Map(balances.map((balance) => [balance.accountId, balance]));
 
   return (
-    <div className="list-stack">
+    <div className="list-stack account-balance-list">
       {accounts.map((account) => {
         const balance = balanceByAccount.get(account.accountId);
         const isCreditCard = account.type === 'credit' || account.subtype?.toLowerCase().includes('credit');
@@ -1041,7 +985,14 @@ function AccountBalanceList({ accounts, balances }: { accounts: Account[]; balan
           <div className="account-balance-line" key={account.accountId}>
             <AccountLogo account={account} />
             <div className="account-balance-details">
-              <strong>{account.name}</strong>
+              <div className="account-balance-name">
+                <strong>{account.name}</strong>
+                {showTrackingStatus && (
+                  <span className={account.tracked ? 'status-pill tracked' : 'status-pill'}>
+                    {account.tracked ? 'Tracked' : 'Hidden'}
+                  </span>
+                )}
+              </div>
               <p>
                 {account.subtype ?? account.type ?? 'Account'}
                 {account.mask ? ` • ${account.mask}` : ''}

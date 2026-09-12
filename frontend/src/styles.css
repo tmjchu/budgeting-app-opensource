@@ -1067,10 +1067,35 @@ h2 {
 .metric-tile p { color: var(--muted); font-weight: 500; }
 .view-stack { gap: 24px; }
 .dashboard-grid { gap: 24px; }
-.dashboard-grid .account-balance-line { grid-template-columns: 34px minmax(0, 1fr); }
-.dashboard-grid .account-balance-line .money-block { grid-column: 2; text-align: left; }
-.dashboard-grid .account-balance-line { row-gap: 7px; padding-block: 16px; }
-.dashboard-grid .account-balance-line .money-block strong { font-size: 1.15rem; }
+.account-balance-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.account-balance-list .account-balance-line {
+  grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+}
+.account-balance-list .account-balance-line .money-block {
+  grid-column: 3;
+  grid-row: 1;
+  text-align: right;
+}
+.account-balance-list .account-balance-details,
+.account-balance-list .account-balance-line .money-block {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.account-balance-list .account-balance-details strong,
+.account-balance-list .account-balance-details p,
+.account-balance-list .account-balance-line .money-block p {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.account-balance-list .account-balance-line { row-gap: 7px; padding-block: 16px; }
+.account-balance-list .account-balance-line .money-block strong { font-size: 1.15rem; }
 .money-block, .amount-cell, .transaction-line > strong { font-variant-numeric: tabular-nums; }
 .category-chip { font-weight: 500; font-size: 0.8rem; }
 .transaction-line { min-height: 70px; }

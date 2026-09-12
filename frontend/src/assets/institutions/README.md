@@ -26,4 +26,20 @@ To add a bank, review its asset and source terms, record the source here, import
 it in `src/lib/institutions.ts`, and add exact institution-name aliases. Never
 match account nicknames. Provider ID arrays are intentionally empty until IDs
 are verified against a source (do not guess production IDs from sandbox data).
-Capital One, Discover, U.S. Bank, PNC, and Ally currently use generic icons.
+Discover and Ally currently use generic icons.
+
+## U.S. top ten and Bilt
+
+Coverage follows the Federal Reserve ranking by consolidated bank assets as of March 31, 2026 (posted July 2, 2026): [ranking](https://www.federalreserve.gov/releases/lbr/20260331/). The top ten are Chase, Bank of America, Citi, Wells Fargo, Goldman Sachs, U.S. Bank, Capital One, PNC, Truist, and BNY. American Express remains supported; Bilt Rewards is an additional user-requested institution.
+
+The following unchanged SVGs were downloaded from Wikimedia Commons on 2026-09-09. Each source labels the logo PD-textlogo (public domain); trademarks remain with their owners. These assets are separate from the MIT-licensed collection above. Exact download URLs and SHA-256 hashes are in `sources.json`.
+
+| File | Institution / mark owner | Source |
+| --- | --- | --- |
+| capital-one.svg | Capital One | [Source and copyright status](https://commons.wikimedia.org/wiki/File:Capital_One_logo.svg) |
+| bilt.svg | Bilt Rewards | [Source and copyright status](https://commons.wikimedia.org/wiki/File:Bilt_Rewards_logo.svg) |
+| goldman-sachs.svg | Goldman Sachs | [Source and copyright status](https://commons.wikimedia.org/wiki/File:Goldman_Sachs_logo.svg) |
+| pnc.svg | PNC | [Source and copyright status](https://commons.wikimedia.org/wiki/File:PNClogo.svg) |
+| bny.svg | BNY | [Source and copyright status](https://commons.wikimedia.org/wiki/File:BNY_logo_2024.svg) |
+| us-bank.svg | U.S. Bank | [Source and copyright status](https://commons.wikimedia.org/wiki/File:US_Bancorp_logo_2023_color.svg) |
+| truist.svg | Truist | [Source and copyright status](https://commons.wikimedia.org/wiki/File:Truist_Financial_logo.svg) |

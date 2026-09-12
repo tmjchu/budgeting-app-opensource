@@ -2,7 +2,9 @@
 
 A local-first personal budgeting app with a Java Spring Boot backend, CSV persistence, Plaid integration, and a React/Vite dashboard for answering the ancient question: "Where did my money go this time?"
 
-![Open Budget dashboard with Plaid Link](docs/assets/local-budget-plaid-dashboard.png)
+![Open Budget overview with sample monthly cash flow, transactions, and account balances](docs/assets/open-budget-overview.jpg)
+
+*Screenshots show the app in UI mock mode with sample data.*
 
 ## Why I Built This
 
@@ -25,6 +27,26 @@ The goal is simple: connect accounts, sync transactions, see balances, review sp
 - Category breakdowns
 - Local CSV persistence
 - Local React dashboard
+
+## Screenshots
+
+### Spending
+
+Review spending by category with a visual breakdown.
+
+![Open Budget spending breakdown with sample category totals](docs/assets/open-budget-spending.jpg)
+
+### Transactions
+
+Search account activity and filter by date, account, category, or amount.
+
+![Open Budget transaction explorer with sample transactions and filters](docs/assets/open-budget-transactions.jpg)
+
+### Accounts
+
+See tracked accounts and their latest balances.
+
+![Open Budget accounts with sample checking, savings, and credit card balances](docs/assets/open-budget-accounts.jpg)
 
 ## Planning
 
